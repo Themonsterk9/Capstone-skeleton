@@ -25,7 +25,7 @@ export default function NotFound() {
           </h2>
           
           <p className="text-text-secondary text-sm md:text-base max-w-md mt-4 leading-relaxed">
-            The page you are looking for has been moved, renamed, or is temporarily offline. Let's redirect you back to active routes.
+            The page you are looking for has been moved, renamed, or is temporarily offline. Let&apos;s redirect you back to active routes.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center gap-4 mt-10">

@@ -67,7 +67,7 @@ export default function About() {
               Platform Milestones
             </h2>
             <p className="text-sm text-text-secondary mt-2">
-              From a Staff Engineer's side-project to a fully optimized enterprise foundation.
+              From a Staff Engineer&apos;s side-project to a fully optimized enterprise foundation.
             </p>
           </div>
 
