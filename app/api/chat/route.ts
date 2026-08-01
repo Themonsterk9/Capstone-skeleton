@@ -4,10 +4,6 @@ import { streamText } from "ai";
 import { AI_CONFIG } from "@/server/ai/model";
 import { FLYRANK_SYSTEM_PROMPT } from "@/server/ai/systemPrompt";
 
-function splitTextIntoChunks(text: string) {
-  return text.match(/.{1,24}/g) ?? [text];
-}
-
 // Mark route as dynamic to prevent static optimization
 export const dynamic = "force-dynamic";
 
@@ -16,96 +12,34 @@ type IncomingMessage = {
   content?: unknown;
 };
 
-function createTextStreamResponse(text: string, req: NextRequest) {
-  const encoder = new TextEncoder();
-  const safeText = text?.trim() ? text : "I’m ready to help. What would you like to know?";
-  const chunks = splitTextIntoChunks(safeText);
-
-  const stream = new ReadableStream<Uint8Array>({
-    async start(controller) {
-      try {
-        for (const chunk of chunks) {
-          if (req.signal?.aborted) {
-            controller.close();
-            return;
-          }
-
-          controller.enqueue(encoder.encode(chunk));
-          await new Promise((resolve) => setTimeout(resolve, 20));
-        }
-
-        controller.close();
-      } catch (error) {
-        console.error("[FlyRank AI] Streaming fallback failed.", error);
-        controller.error(error);
-      }
-    },
-  });
-
-  return new Response(stream, {
-    headers: {
-      "Content-Type": "text/plain; charset=utf-8",
-      "Cache-Control": "no-cache, no-transform",
-      "X-Accel-Buffering": "no",
-    },
-  });
-}
-
+/**
+ * Builds the conversation message array for the AI provider.
+ * Filters out system messages, empty content, and the current
+ * assistant placeholder before forwarding to the model.
+ */
 function buildConversationMessages(messages: IncomingMessage[], latestUserContent: string) {
   const cleanedHistory = (messages || [])
-    .filter((message): message is IncomingMessage => Boolean(message && typeof message.content === "string" && message.content.trim()))
+    .filter(
+      (message): message is IncomingMessage =>
+        Boolean(message && typeof message.content === "string" && message.content.trim())
+    )
     .filter((message) => message.role !== "system")
     .filter((message) => message.role !== "assistant" || String(message.content).trim())
-    .slice(-8)
+    .slice(-10) // keep last 10 turns for context
     .map((message) => ({
-      role: message.role === "assistant" ? "assistant" : "user",
+      role: message.role === "assistant" ? ("assistant" as const) : ("user" as const),
       content: String(message.content).trim(),
     }));
 
   return [
-    { role: "system" as const, content: FLYRANK_SYSTEM_PROMPT },
     ...cleanedHistory,
     { role: "user" as const, content: latestUserContent.trim() },
   ];
 }
 
-function generateLocalReply(userPrompt: string, history: Array<{ role: "user" | "assistant"; content: string }>) {
-  const normalized = userPrompt.trim().toLowerCase();
-
-  if (!normalized) {
-    return "I’m ready to help. What would you like to know?";
-  }
-
-  if (normalized.includes("hello") || normalized.includes("hi")) {
-    return "Hello! I can help with your latest question right away.";
-  }
-
-  if (normalized.includes("prime minister") && normalized.includes("india")) {
-    return "The Prime Minister of India is Narendra Modi.";
-  }
-
-  if (normalized.includes("constitution") && normalized.includes("india")) {
-    return "The Constitution of India is the supreme law of the country. It was adopted on 26 November 1949 and came into effect on 26 January 1950. It defines the structure of government, fundamental rights, duties, and the division of powers between the centre and the states.";
-  }
-
-  if (normalized.includes("react") && normalized.includes("tutorial")) {
-    return "Here is a short React tutorial: create a component with a function, return JSX, manage local state with useState, and handle events with functions. Example: `const [count, setCount] = useState(0);` then render a button that calls `setCount(count + 1)`.";
-  }
-
-  if (normalized.includes("joke")) {
-    return "Sure — why do developers go to the beach? Because they’re tired of the current!";
-  }
-
-  const lastUser = [...history].reverse().find((entry) => entry.role === "user");
-  if (lastUser) {
-    return `You previously asked: ${lastUser.content}. I’m continuing from that context and answering your latest question: ${userPrompt}`;
-  }
-
-  return `You asked: ${userPrompt}. I can help with that directly.`;
-}
-
 export async function POST(req: NextRequest) {
   try {
+    // 1. Parse request body
     const body = await req.json().catch(() => null);
 
     if (!body || !Array.isArray(body.messages) || body.messages.length === 0) {
@@ -118,98 +52,106 @@ export async function POST(req: NextRequest) {
     const { messages } = body;
     const lastMessage = messages[messages.length - 1];
 
-    if (!lastMessage || typeof lastMessage.content !== "string" || !lastMessage.content.trim()) {
+    if (
+      !lastMessage ||
+      typeof lastMessage.content !== "string" ||
+      !lastMessage.content.trim()
+    ) {
       return NextResponse.json(
         { error: "Message content cannot be empty." },
         { status: 400 }
       );
     }
 
-    const conversationMessages = buildConversationMessages(messages, lastMessage.content);
-    const providerMessages = conversationMessages
-      .filter((message) => message.role !== "system")
-      .map((message) => ({
-        role: message.role === "assistant" ? "assistant" : "user",
-        content: String(message.content),
-      } as const));
+    // 2. Validate API key presence
+    const geminiKey =
+      process.env.GOOGLE_GENERATIVE_AI_API_KEY || process.env.GEMINI_API_KEY;
 
-    const geminiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY || process.env.GEMINI_API_KEY;
-    const isRealGeminiKey = Boolean(geminiKey && !geminiKey.includes("your_gemini") && geminiKey !== "mock");
-
-    const fallbackResponseText = generateLocalReply(lastMessage.content, providerMessages);
-
-    if (isRealGeminiKey) {
-      try {
-        const google = createGoogleGenerativeAI({ apiKey: geminiKey });
-        const modelProvider = google(AI_CONFIG.PRIMARY_MODEL || "gemini-2.0-flash");
-
-        const result = streamText({
-          model: modelProvider,
-          system: FLYRANK_SYSTEM_PROMPT,
-          messages: providerMessages,
-          temperature: AI_CONFIG.TEMPERATURE,
-          maxOutputTokens: AI_CONFIG.MAX_TOKENS,
-          topP: AI_CONFIG.TOP_P,
-          maxRetries: 0,
-          abortSignal: req.signal,
-        });
-
-        const reader = result.textStream.getReader();
-        const encoder = new TextEncoder();
-        const stream = new ReadableStream<Uint8Array>({
-          async start(controller) {
-            try {
-              let providerText = "";
-
-              while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-                if (req.signal?.aborted) {
-                  controller.close();
-                  return;
-                }
-                if (value) {
-                  providerText += value;
-                  controller.enqueue(encoder.encode(value));
-                }
-              }
-
-              if (!providerText.trim()) {
-                throw new Error("Provider returned an empty response.");
-              }
-
-              controller.close();
-            } catch (error) {
-              console.warn("[FlyRank AI] Provider stream failed, falling back.", error);
-              for (const chunk of splitTextIntoChunks(fallbackResponseText)) {
-                if (req.signal?.aborted) {
-                  controller.close();
-                  return;
-                }
-                controller.enqueue(encoder.encode(chunk));
-                await new Promise((resolve) => setTimeout(resolve, 20));
-              }
-              controller.close();
-            }
-          },
-        });
-
-        return new Response(stream, {
-          headers: {
-            "Content-Type": "text/plain; charset=utf-8",
-            "Cache-Control": "no-cache, no-transform",
-            "X-Accel-Buffering": "no",
-          },
-        });
-      } catch (error) {
-        console.warn("[FlyRank AI] Provider initialization failed, falling back.", error);
-      }
+    if (!geminiKey || geminiKey.trim() === "" || geminiKey.includes("your_gemini")) {
+      console.error("[FlyRank AI] GEMINI_API_KEY is missing or not configured.");
+      return NextResponse.json(
+        {
+          error:
+            "AI provider is not configured. Please set GOOGLE_GENERATIVE_AI_API_KEY or GEMINI_API_KEY in your environment variables.",
+        },
+        { status: 503 }
+      );
     }
 
-    return createTextStreamResponse(fallbackResponseText, req);
+    // 3. Build the provider message array (excludes system prompt — passed separately)
+    const providerMessages = buildConversationMessages(
+      // Exclude the very last message from history since we pass it as latestUserContent
+      messages.slice(0, -1),
+      lastMessage.content
+    );
+
+    // 4. Initialize Google Generative AI provider
+    const google = createGoogleGenerativeAI({ apiKey: geminiKey });
+    const modelProvider = google(AI_CONFIG.PRIMARY_MODEL || "gemini-2.0-flash");
+
+    // 5. Call streamText with the correct AI SDK v7 API surface
+    const result = streamText({
+      model: modelProvider,
+      system: FLYRANK_SYSTEM_PROMPT,
+      messages: providerMessages,
+      temperature: AI_CONFIG.TEMPERATURE,
+      maxRetries: 1,
+      abortSignal: req.signal,
+      providerOptions: {
+        google: {
+          maxOutputTokens: AI_CONFIG.MAX_TOKENS,
+          topP: AI_CONFIG.TOP_P,
+        },
+      },
+    });
+
+    // 6. Stream the real AI response directly to the client
+    const encoder = new TextEncoder();
+    const stream = new ReadableStream<Uint8Array>({
+      async start(controller) {
+        try {
+          let hasText = false;
+
+          for await (const textChunk of result.textStream) {
+            if (req.signal?.aborted) {
+              controller.close();
+              return;
+            }
+
+            if (textChunk) {
+              hasText = true;
+              controller.enqueue(encoder.encode(textChunk));
+            }
+          }
+
+          if (!hasText) {
+            // Model returned nothing — surface a real error, never a fake response
+            controller.enqueue(
+              encoder.encode(
+                "⚠️ The AI model returned an empty response. Please try again."
+              )
+            );
+          }
+
+          controller.close();
+        } catch (streamError) {
+          console.error("[FlyRank AI] Streaming error:", streamError);
+          controller.error(streamError);
+        }
+      },
+    });
+
+    return new Response(stream, {
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8",
+        "Cache-Control": "no-cache, no-transform",
+        "X-Accel-Buffering": "no",
+      },
+    });
   } catch (err: unknown) {
     console.error("[FlyRank AI Route Exception]", err);
-    const errorMessage = err instanceof Error ? err.message : "An unexpected server error occurred.";
+    const errorMessage =
+      err instanceof Error ? err.message : "An unexpected server error occurred.";
     return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
