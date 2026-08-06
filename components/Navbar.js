@@ -13,6 +13,7 @@ const NAV_LINKS = [
   { href: "/features", label: "Features" },
   { href: "/dashboard", label: "Dashboard" },
   { href: "/chat", label: "AI Chat" },
+  { href: "/seo-audit", label: "SEO Audit", badge: "New" },
   { href: "/contact", label: "Contact" },
   { href: "/health", label: "Health" },
 ];
@@ -59,13 +60,18 @@ export default function Navbar() {
                   key={link.href}
                   href={link.href}
                   className={cn(
-                    "text-sm font-medium transition-all duration-200 relative py-1.5",
+                    "text-sm font-medium transition-all duration-200 relative py-1.5 flex items-center gap-1.5",
                     isActive
                       ? "text-white"
                       : "text-gray-400 hover:text-white"
                   )}
                 >
                   {link.label}
+                  {link.badge && (
+                    <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 font-semibold leading-none">
+                      {link.badge}
+                    </span>
+                  )}
                   {isActive && (
                     <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-secondary to-primary rounded-full" />
                   )}

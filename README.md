@@ -115,3 +115,182 @@ The application utilizes the following parameters. Configure them in `.env.local
 
 ## Screenshots Placeholder
 *Once deployed to Vercel, attach screenshots showing mobile, tablet, and desktop views of the Interactive Flight Log Console.*
+
+---
+
+## FE-07: AI SDK Tool Calling with Generative UI
+
+FlyRank now includes a production-quality **SEO Audit Assistant** powered by AI SDK v7 tool calling with beautiful Generative UI. Access it at [`/seo-audit`](http://localhost:3000/seo-audit).
+
+### Tool: `seoAudit`
+
+| Property | Value |
+|---|---|
+| **Tool Name** | `seoAudit` |
+| **Route** | `POST /api/tool-chat` |
+| **Tool File** | `server/tools/seoAudit.ts` |
+| **Description** | Analyzes a webpage and returns a comprehensive structured SEO report |
+
+### Schema
+
+**Input Schema** (Zod):
+```typescript
+z.object({
+  url: z.string().url()  // Full URL of the webpage to audit
+})
+```
+
+**Output Schema** (Zod):
+```typescript
+z.object({
+  url: z.string().url(),
+  title: z.string(),
+  metaDescription: z.string(),
+  canonical: z.string(),
+  robots: z.string(),
+  language: z.string(),
+  headings: z.array(z.object({ level: z.number(), text: z.string() })),
+  imagesWithoutAlt: z.array(z.object({ src: z.string(), context: z.string() })),
+  brokenLinks: z.array(z.object({ href: z.string(), statusCode: z.number(), text: z.string() })),
+  pageSpeedEstimate: z.object({
+    fcp: z.number(),   // First Contentful Paint (ms)
+    lcp: z.number(),   // Largest Contentful Paint (ms)
+    cls: z.number(),   // Cumulative Layout Shift score
+    ttfb: z.number(),  // Time to First Byte (ms)
+  }),
+  seoScore: z.number().int().min(0).max(100),
+  recommendations: z.array(z.object({
+    priority: z.enum(["critical", "high", "medium", "low"]),
+    category: z.string(),
+    title: z.string(),
+    description: z.string(),
+  })),
+})
+```
+
+### Example Request
+
+```json
+POST /api/tool-chat
+{
+  "messages": [
+    { "role": "user", "content": "Audit https://example.com for SEO issues" }
+  ]
+}
+```
+
+### Example Response (streamed AI SDK UI message stream)
+
+The server streams in AI SDK v7 UI message stream protocol. The tool result includes:
+
+```json
+{
+  "url": "https://example.com",
+  "title": "Example Domain | Example",
+  "metaDescription": "Example domain description...",
+  "canonical": "https://example.com",
+  "robots": "index, follow",
+  "language": "en",
+  "headings": [{ "level": 1, "text": "Welcome to example.com" }, ...],
+  "imagesWithoutAlt": [],
+  "brokenLinks": [],
+  "pageSpeedEstimate": { "fcp": 1800, "lcp": 2900, "cls": 0.05, "ttfb": 350 },
+  "seoScore": 85,
+  "recommendations": [
+    {
+      "priority": "medium",
+      "category": "Content Structure",
+      "title": "Improve Heading Hierarchy",
+      "description": "Ensure a single H1 tag and logical heading structure..."
+    }
+  ]
+}
+```
+
+### Tool Lifecycle States (4 Required States)
+
+| State | Component | Description |
+|---|---|---|
+| 1. `streaming` | `ToolLoadingCard` | Framer Motion skeleton + spinner + "Analyzing..." |
+| 2. `input` | `ToolInputCard` | Shows selected tool + URL cleanly (no JSON) |
+| 3. `output` | `SEOAuditResult` | Full Generative UI with all SEO components |
+| 4. `error` | `ToolErrorCard` | Animated error with retry button |
+
+### Component Flow
+
+```
+useToolChat hook (hooks/useToolChat.ts)
+  └─ POST /api/tool-chat (app/api/tool-chat/route.ts)
+       └─ streamText() + seoAuditTool (server/tools/seoAudit.ts)
+            └─ toUIMessageStream() → createUIMessageStreamResponse()
+
+ToolChatPage (components/chat/ToolChatPage.tsx)
+  └─ AssistantBubble
+       └─ ToolRenderer (components/tools/ToolRenderer.tsx)
+            ├─ state="streaming" → ToolLoadingCard
+            ├─ state="input"     → ToolInputCard
+            ├─ state="output"    → SEOAuditResult
+            │    ├─ SEOScoreCard       (animated arc progress)
+            │    ├─ AuditSummary       (metrics + Core Web Vitals)
+            │    ├─ MetadataCard       (title, meta, canonical, robots)
+            │    ├─ HeadingTree        (H1-H6 hierarchy)
+            │    ├─ FindingsTable      (images + broken links)
+            │    └─ RecommendationCard (priority-sorted fixes)
+            └─ state="error"     → ToolErrorCard
+```
+
+### Updated Folder Structure (FE-07 additions)
+
+```
+├── app/
+│   ├── api/
+│   │   └── tool-chat/        # [NEW] AI SDK tool-enabled streaming endpoint
+│   │       └── route.ts
+│   └── seo-audit/            # [NEW] SEO Audit chat page route
+│       └── page.tsx
+├── components/
+│   └── tools/                # [NEW] Tool UI component library
+│       ├── ToolLoadingCard.tsx
+│       ├── ToolInputCard.tsx
+│       ├── ToolErrorCard.tsx
+│       ├── ToolRenderer.tsx
+│       ├── SEOAuditResult.tsx
+│       ├── SEOScoreCard.tsx
+│       ├── MetadataCard.tsx
+│       ├── HeadingTree.tsx
+│       ├── FindingsTable.tsx
+│       ├── RecommendationCard.tsx
+│       └── AuditSummary.tsx
+├── hooks/
+│   └── useToolChat.ts        # [NEW] AI SDK stream parser & tool state manager
+├── server/
+│   └── tools/
+│       └── seoAudit.ts       # [NEW] Zod schema + mock SEO audit tool
+└── types/
+    └── tools.ts              # [NEW] Tool lifecycle types
+```
+
+### Architecture Diagram
+
+```
+Client                          Server
+  │                               │
+  │  POST /api/tool-chat           │
+  ├──────────────────────────────►│
+  │                               │  streamText({
+  │                               │    model: gemini-2.0-flash,
+  │                               │    tools: { seoAudit },
+  │                               │    stopWhen: isStepCount(3)
+  │                               │  })
+  │                               │
+  │  ◄── AI SDK UI stream ─────── │  tool.execute() → mock data
+  │    "a": tool-call-start        │
+  │    "b": arg deltas             │
+  │    "a": tool-result            │
+  │    "0": text delta             │
+  │    "d": finish                 │
+  │                               │
+  │  useToolChat parses stream     │
+  │  → streaming → input → output  │
+  │  ToolRenderer renders UI       │
+```
