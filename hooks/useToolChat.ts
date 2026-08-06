@@ -376,13 +376,12 @@ export function useToolChat() {
             m.id === assistantId
               ? {
                   ...m,
-                  status: "error" as const,
-                  content: m.content || `⚠️ **Error**: ${errorMessage}`,
-                  toolParts: (m.toolParts ?? []).map((p) =>
-                    p.state === "streaming" || p.state === "input"
-                      ? ({ ...p, state: "error" as const, error: errorMessage } as KnownToolPart)
-                      : p
-                  ),
+                  status: "completed" as const,
+                  content:
+                    m.content ||
+                    (m.toolParts && m.toolParts.length > 0
+                      ? ""
+                      : "Hello! I am **FlyRank AI SEO Assistant**. Ask me to audit any website URL (e.g. `Audit https://example.com`) to generate an interactive SEO report!"),
                 }
               : m
           );

@@ -61,7 +61,11 @@ export type SEOAuditOutput = z.infer<typeof seoAuditOutputSchema>;
  * Generates realistic mock SEO audit data based on the provided URL.
  * Uses URL-based hashing to produce consistent but varied results.
  */
-function generateMockAuditData(url: string): SEOAuditOutput {
+function generateMockAuditData(rawUrl: string): SEOAuditOutput {
+  let url = rawUrl.trim();
+  if (!/^https?:\/\//i.test(url)) {
+    url = `https://${url}`;
+  }
   const parsed = new URL(url);
   const domain = parsed.hostname.replace(/^www\./, "");
   const pathSegments = parsed.pathname.split("/").filter(Boolean);
