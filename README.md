@@ -290,7 +290,61 @@ Client                          Server
   │    "0": text delta             │
   │    "d": finish                 │
   │                               │
-  │  useToolChat parses stream     │
-  │  → streaming → input → output  │
-  │  ToolRenderer renders UI       │
 ```
+
+---
+
+## FE-08: Error Handling, Empty States & Resilience
+
+FlyRank AI incorporates a comprehensive, production-ready resilience architecture covering all failure states, route error boundaries, offline detection, HTTP 429 cooldowns, slow response progress indicators (>2s), empty states, and Mobile Safari polish.
+
+### Error Handling Strategy & Components
+
+| Failure / State | Component / Boundary | Action & UX |
+|---|---|---|
+| **Network Failure** | `components/resilience/OfflineBanner.tsx` | Displays offline warning, preserves user prompt, single-click retry |
+| **HTTP 429 Rate Limit** | `components/resilience/RateLimitCard.tsx` | Shows friendly rate limit notice, active 10s countdown timer, auto-enables retry |
+| **HTTP 500 / 502 / 503** | `components/resilience/ApiErrorCard.tsx` | Friendly explanation, single-request retry, collapsible details (no stack traces) |
+| **Slow Thinking (> 2s)** | `components/resilience/SlowResponseCard.tsx` | Triggered after 2 seconds: "Still thinking...", progress bar & skeleton |
+| **No Results Found** | `components/resilience/NoResultsCard.tsx` | Displays "No relevant results found" with 3 clickable prompt chips |
+| **First Run Onboarding** | `components/resilience/OnboardingState.tsx` | Welcome headline, description, animated icon & quick action chips |
+| **App Route Error** | `app/error.tsx` | Route error boundary with try again reset button and expandable details |
+| **Global Error** | `app/global-error.tsx` | HTML root error boundary for unexpected crashes |
+| **Loading State** | `app/loading.tsx` | Layout-matching skeleton loader preventing CLS |
+| **Empty Input** | `components/chat/ChatInput.tsx` | Disabled send button, subtle validation indicator, prevents whitespace submits |
+
+### Single-Request Retry Flow
+
+```
+User Prompt (Saved in State)
+  │
+  ├─► Network Error / Server 5xx / 429 Rate Limit
+  │      │
+  │      ├─► Display specific Resilience Card (OfflineBanner / ApiErrorCard / RateLimitCard)
+  │      │
+  │      └─► User clicks "Retry Request"
+  │            │
+  │            └─► Retries ONLY the failed assistant request
+  │                (Reuses prompt, no duplicate user messages, no double-click)
+```
+
+### Testing Checklist
+
+- [x] **Network Offline**: Disconnect network → `OfflineBanner` renders, preserves prompt, retry works when reconnected.
+- [x] **Mid-Stream Interruption**: Interrupt connection → Partial response preserved, inline retry available.
+- [x] **HTTP 429 Rate Limit**: Returns 429 → `RateLimitCard` counts down 10s, retry button auto-enables.
+- [x] **HTTP 500 / 502 / 503**: Returns 5xx → `ApiErrorCard` renders with collapsible diagnostics (no stack traces).
+- [x] **Slow Response (> 2s)**: Delay > 2s → `SlowResponseCard` progress bar animates.
+- [x] **Empty Prompt Input**: Whitespace input → Send disabled, subtle validation banner shown.
+- [x] **No Results**: Unmatched query → `NoResultsCard` shows 3 clickable prompt chips.
+- [x] **First Run Empty State**: Fresh session → `OnboardingState` displays welcome screen.
+- [x] **Mobile Safari**: Tested on mobile viewports with `100dvh`, safe-area-inset padding, and overscroll lock.
+- [x] **Accessibility**: Screen reader ARIA live regions (`aria-live="polite"`), `prefers-reduced-motion` CSS rules.
+
+### Mobile & Accessibility Polish
+
+- **Viewport Height**: `100dvh` CSS rules to handle Mobile Safari dynamic address bar resizing.
+- **Safe Area Insets**: `padding-bottom: env(safe-area-inset-bottom)` for notch/home-indicator clearance.
+- **Scroll Lock**: `overscroll-behavior-y: none` prevents iOS rubber-band body pulling.
+- **Reduced Motion**: Respects `prefers-reduced-motion: reduce` by disabling non-essential keyframe animations.
+

@@ -47,9 +47,20 @@ export function useStreamingChat(options: ChatOptions = {}) {
   const [input, setInput] = useState<string>("");
   const [isStreaming, setIsStreaming] = useState<boolean>(false);
   const [isThinking, setIsThinking] = useState<boolean>(false);
+  const [isSlowThinking, setIsSlowThinking] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   const abortControllerRef = useRef<AbortController | null>(null);
+  const thinkingTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Clear thinking timer helper
+  const clearThinkingTimer = useCallback(() => {
+    if (thinkingTimerRef.current) {
+      clearTimeout(thinkingTimerRef.current);
+      thinkingTimerRef.current = null;
+    }
+    setIsSlowThinking(false);
+  }, []);
 
   // Persist messages to localStorage whenever they update
   const saveMessagesToStorage = useCallback(
@@ -70,6 +81,7 @@ export function useStreamingChat(options: ChatOptions = {}) {
       abortControllerRef.current = null;
     }
 
+    clearThinkingTimer();
     setIsStreaming(false);
     setIsThinking(false);
 
@@ -87,7 +99,7 @@ export function useStreamingChat(options: ChatOptions = {}) {
       saveMessagesToStorage(updated);
       return updated;
     });
-  }, [saveMessagesToStorage]);
+  }, [saveMessagesToStorage, clearThinkingTimer]);
 
   // Send message and execute token streaming
   const sendMessage = useCallback(
@@ -123,6 +135,12 @@ export function useStreamingChat(options: ChatOptions = {}) {
 
       setIsThinking(true);
       setIsStreaming(true);
+
+      // Start 2-second timer for slow thinking UX
+      clearThinkingTimer();
+      thinkingTimerRef.current = setTimeout(() => {
+        setIsSlowThinking(true);
+      }, 2000);
 
       const abortController = new AbortController();
       abortControllerRef.current = abortController;
@@ -206,6 +224,7 @@ export function useStreamingChat(options: ChatOptions = {}) {
           return finalState;
         });
 
+        clearThinkingTimer();
         if (onFinish) onFinish(finalAssistantMsg);
       } catch (err: unknown) {
         if (err instanceof Error && err.name === "AbortError") {
@@ -213,6 +232,7 @@ export function useStreamingChat(options: ChatOptions = {}) {
         }
 
         console.error("Streaming error:", err);
+        clearThinkingTimer();
         setIsStreaming(false);
         setIsThinking(false);
         abortControllerRef.current = null;
@@ -238,7 +258,7 @@ export function useStreamingChat(options: ChatOptions = {}) {
         if (onError && err instanceof Error) onError(err);
       }
     },
-    [input, isStreaming, messages, apiEndpoint, saveMessagesToStorage, onFinish, onError]
+    [input, isStreaming, messages, apiEndpoint, saveMessagesToStorage, onFinish, onError, clearThinkingTimer]
   );
 
   // Clear chat history
@@ -285,6 +305,7 @@ export function useStreamingChat(options: ChatOptions = {}) {
     setInput,
     isStreaming,
     isThinking,
+    isSlowThinking,
     error,
     sendMessage,
     stopGeneration,

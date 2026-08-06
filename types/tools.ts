@@ -40,5 +40,5 @@ export interface ToolChatMessage {
   content: string;
   timestamp: string;
   toolParts?: KnownToolPart[];
-  status?: "thinking" | "streaming" | "completed" | "error";
+  status?: "thinking" | "streaming" | "completed" | "error" | "stopped";
 }

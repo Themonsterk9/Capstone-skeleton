@@ -2,9 +2,11 @@
 
 import React, { useState } from "react";
 import { useStreamingChat } from "@/hooks/useStreamingChat";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import ChatWindow from "./ChatWindow";
 import ChatInput from "./ChatInput";
 import Container from "@/components/Container";
+import OfflineBanner from "@/components/resilience/OfflineBanner";
 
 export default function ChatPage() {
   const {
@@ -13,6 +15,7 @@ export default function ChatPage() {
     input,
     setInput,
     isStreaming,
+    isSlowThinking,
     error,
     sendMessage,
     stopGeneration,
@@ -21,6 +24,7 @@ export default function ChatPage() {
     exportConversation,
   } = useStreamingChat();
 
+  const { isOnline } = useNetworkStatus();
   const [showClearConfirm, setShowClearConfirm] = useState(false);
 
   return (
@@ -91,8 +95,15 @@ export default function ChatPage() {
         </Container>
       </header>
 
+      {/* Network Offline Banner */}
+      {!isOnline && (
+        <div className="px-4 py-1">
+          <OfflineBanner onRetry={retryLastMessage} isRetrying={isStreaming} />
+        </div>
+      )}
+
       {/* Network Error Toast / Banner */}
-      {error && (
+      {error && isOnline && (
         <div className="shrink-0 bg-red-950/80 border-b border-red-800/50 px-4 py-2 text-xs text-red-200 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
@@ -111,6 +122,7 @@ export default function ChatPage() {
       <ChatWindow
         messages={messages}
         isStreaming={isStreaming}
+        isSlowThinking={isSlowThinking}
         isMounted={isMounted}
         onSelectPrompt={(text) => sendMessage(text)}
       />

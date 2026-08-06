@@ -3,10 +3,14 @@
 import React, { useRef, useEffect, useCallback, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToolChat } from "@/hooks/useToolChat";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { ToolChatMessage } from "@/types/tools";
 import ToolRenderer from "@/components/tools/ToolRenderer";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import OfflineBanner from "@/components/resilience/OfflineBanner";
+import SlowResponseCard from "@/components/resilience/SlowResponseCard";
+import OnboardingState from "@/components/resilience/OnboardingState";
 
 // ─── Suggested Prompts ─────────────────────────────────────────────────────────
 const SUGGESTED_PROMPTS = [
@@ -135,6 +139,7 @@ export default function ToolChatPage() {
     input,
     setInput,
     isStreaming,
+    isSlowThinking,
     error,
     sendMessage,
     stopGeneration,
@@ -142,6 +147,7 @@ export default function ToolChatPage() {
     retryLastMessage,
   } = useToolChat();
 
+  const { isOnline } = useNetworkStatus();
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -154,7 +160,7 @@ export default function ToolChatPage() {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages, scrollToBottom]);
+  }, [messages, isStreaming, isSlowThinking, scrollToBottom]);
 
   // Auto-resize textarea
   useEffect(() => {
@@ -167,7 +173,9 @@ export default function ToolChatPage() {
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      sendMessage();
+      if (input.trim()) {
+        sendMessage();
+      }
     }
   };
 
@@ -207,9 +215,16 @@ export default function ToolChatPage() {
         </div>
       </header>
 
+      {/* Network Offline Banner */}
+      {!isOnline && (
+        <div className="px-4 py-1">
+          <OfflineBanner onRetry={retryLastMessage} isRetrying={isStreaming} />
+        </div>
+      )}
+
       {/* Error Toast */}
       <AnimatePresence>
-        {error && (
+        {error && isOnline && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
@@ -240,41 +255,13 @@ export default function ToolChatPage() {
       >
         <div className="max-w-4xl mx-auto">
           {displayMessages.length === 0 ? (
-            /* Empty State */
-            <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-              >
-                <div className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-cyan-600/20 to-indigo-600/20 border border-cyan-500/20 flex items-center justify-center mb-6 mx-auto shadow-glow-secondary">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.3} stroke="currentColor" className="w-10 h-10 text-cyan-400">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-                  </svg>
-                </div>
-                <h2 className="text-2xl font-bold font-display text-white mb-2">
-                  SEO Audit Assistant
-                </h2>
-                <p className="text-sm text-gray-400 max-w-md mb-8 leading-relaxed">
-                  Ask me to audit any website. I&apos;ll analyze its SEO health and generate a comprehensive report with scores, findings, and recommendations.
-                </p>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl w-full">
-                  {SUGGESTED_PROMPTS.map((prompt, i) => (
-                    <button
-                      key={i}
-                      onClick={() => sendMessage(prompt)}
-                      className="p-3.5 rounded-xl glass-panel glass-panel-hover text-left text-xs text-gray-300 hover:text-white border border-white/10 hover:border-cyan-500/40 transition-all flex items-start gap-2.5 group"
-                    >
-                      <span className="text-cyan-400 font-mono text-[10px] shrink-0 mt-0.5">
-                        0{i + 1}.
-                      </span>
-                      <span className="leading-relaxed group-hover:text-cyan-200">{prompt}</span>
-                    </button>
-                  ))}
-                </div>
-              </motion.div>
-            </div>
+            /* First Run Onboarding State */
+            <OnboardingState
+              title="SEO Audit Assistant"
+              description="Ask me to audit any website URL. I'll analyze its SEO health and generate an interactive report with scores, findings, and recommendations."
+              prompts={SUGGESTED_PROMPTS}
+              onSelectPrompt={(text) => sendMessage(text)}
+            />
           ) : (
             <div className="space-y-2 pb-4">
               {displayMessages.map((msg, idx) =>
@@ -289,6 +276,12 @@ export default function ToolChatPage() {
                   />
                 )
               )}
+
+              {/* Slow Thinking Indicator (> 2 seconds) */}
+              {isSlowThinking && isStreaming && (
+                <SlowResponseCard />
+              )}
+
               <div ref={bottomRef} />
             </div>
           )}

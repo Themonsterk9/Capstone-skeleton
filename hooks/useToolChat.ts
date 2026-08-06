@@ -67,35 +67,55 @@ export function useToolChat() {
     return [];
   });
 
-  const [input, setInput] = useState("");
-  const [isStreaming, setIsStreaming] = useState(false);
+  const [input, setInput] = useState<string>("");
+  const [isStreaming, setIsStreaming] = useState<boolean>(false);
+  const [isSlowThinking, setIsSlowThinking] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const abortControllerRef = useRef<AbortController | null>(null);
 
-  const saveMessages = useCallback((msgs: ToolChatMessage[]) => {
-    try {
-      localStorage.setItem(TOOL_STORAGE_KEY, JSON.stringify(msgs));
-    } catch { /* ignore */ }
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const thinkingTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const clearThinkingTimer = useCallback(() => {
+    if (thinkingTimerRef.current) {
+      clearTimeout(thinkingTimerRef.current);
+      thinkingTimerRef.current = null;
+    }
+    setIsSlowThinking(false);
   }, []);
 
+  const saveMessages = useCallback(
+    (msgs: ToolChatMessage[]) => {
+      try {
+        localStorage.setItem(TOOL_STORAGE_KEY, JSON.stringify(msgs));
+      } catch (e) {
+        console.warn("Failed to save tool chat history", e);
+      }
+    },
+    []
+  );
+
   const stopGeneration = useCallback(() => {
-    abortControllerRef.current?.abort();
-    abortControllerRef.current = null;
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+    clearThinkingTimer();
     setIsStreaming(false);
+
     setMessages((prev) => {
       const updated = prev.map((m) =>
-        m.status === "streaming" || m.status === "thinking"
-          ? { ...m, status: "completed" as const }
+        m.status === "thinking" || m.status === "streaming"
+          ? { ...m, status: "stopped" as const }
           : m
       );
       saveMessages(updated);
       return updated;
     });
-  }, [saveMessages]);
+  }, [saveMessages, clearThinkingTimer]);
 
   const sendMessage = useCallback(
     async (overrideContent?: string) => {
-      const content = (overrideContent ?? input).trim();
+      const content = (overrideContent !== undefined ? overrideContent : input).trim();
       if (!content || isStreaming) return;
 
       setError(null);
@@ -123,6 +143,12 @@ export function useToolChat() {
       setMessages(nextMessages);
       saveMessages(nextMessages);
       setIsStreaming(true);
+
+      // Start 2-second slow thinking timer
+      clearThinkingTimer();
+      thinkingTimerRef.current = setTimeout(() => {
+        setIsSlowThinking(true);
+      }, 2000);
 
       const abortController = new AbortController();
       abortControllerRef.current = abortController;
@@ -389,11 +415,12 @@ export function useToolChat() {
           return updated;
         });
       } finally {
+        clearThinkingTimer();
         setIsStreaming(false);
         abortControllerRef.current = null;
       }
     },
-    [input, isStreaming, messages, saveMessages]
+    [input, isStreaming, messages, saveMessages, clearThinkingTimer]
   );
 
   const clearMessages = useCallback(() => {
@@ -418,6 +445,7 @@ export function useToolChat() {
     input,
     setInput,
     isStreaming,
+    isSlowThinking,
     error,
     sendMessage,
     stopGeneration,
