@@ -74,9 +74,9 @@ export default function About() {
           <div className="relative border-l border-white/10 max-w-2xl mx-auto pl-6 md:pl-8 flex flex-col gap-8">
             <div className="relative">
               <div className="absolute -left-[31px] md:-left-[39px] w-4.5 h-4.5 rounded-full bg-secondary ring-4 ring-[#0b0d18] border border-white" />
-              <h4 className="text-white font-bold text-base font-display">
+              <h3 className="text-white font-bold text-base font-display">
                 Phase 3 — Expansion & Alliance Integrations
-              </h4>
+              </h3>
               <span className="text-xs text-secondary font-semibold">Q3 2026</span>
               <p className="text-xs text-text-secondary mt-1">
                 Adding multi-passenger status trackers, group routing simulations, and dynamic reward calendar alerts.
@@ -85,9 +85,9 @@ export default function About() {
 
             <div className="relative">
               <div className="absolute -left-[31px] md:-left-[39px] w-4.5 h-4.5 rounded-full bg-primary ring-4 ring-[#0b0d18]" />
-              <h4 className="text-white font-bold text-base font-display">
+              <h3 className="text-white font-bold text-base font-display">
                 Phase 2 — Advanced Ranking Algorithms
-              </h4>
+              </h3>
               <span className="text-xs text-primary font-semibold">Q1 2026</span>
               <p className="text-xs text-text-secondary mt-1">
                 Integrating partner flight validation engines, tier mapping matrices, and automated airline status matches.
@@ -96,9 +96,9 @@ export default function About() {
 
             <div className="relative">
               <div className="absolute -left-[31px] md:-left-[39px] w-4.5 h-4.5 rounded-full bg-slate-600 ring-4 ring-[#0b0d18]" />
-              <h4 className="text-white font-bold text-base font-display">
+              <h3 className="text-white font-bold text-base font-display">
                 Phase 1 — Foundations Launch (Current)
-              </h4>
+              </h3>
               <span className="text-xs text-slate-400 font-semibold">Q4 2025</span>
               <p className="text-xs text-text-secondary mt-1">
                 Initializing the core application framework, responsive layout navigation, dark theme UI components, and server-side status health page.

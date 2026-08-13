@@ -23,6 +23,8 @@ export default function SendButton({ disabled, onClick }: SendButtonProps) {
         strokeWidth={2}
         stroke="currentColor"
         className="w-5 h-5"
+        width="20"
+        height="20"
       >
         <path
           strokeLinecap="round"

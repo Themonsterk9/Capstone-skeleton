@@ -95,44 +95,49 @@ export default function Contact() {
                   
                   {/* Name field */}
                   <div>
-                    <label className="block text-xs font-semibold text-white uppercase tracking-wider mb-1.5">
+                    <label htmlFor="contact-name-input" className="block text-xs font-semibold text-white uppercase tracking-wider mb-1.5">
                       Full Name
                     </label>
                     <input
+                      id="contact-name-input"
                       type="text"
                       placeholder="Jane Doe"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
+                      aria-describedby={errors.name ? "contact-name-error" : undefined}
                       className={`w-full bg-[#0d101c] border rounded-lg px-3.5 py-2.5 text-white placeholder-gray-600 focus:outline-none text-sm transition-all duration-200 ${
                         errors.name ? "border-red-500 focus:ring-1 focus:ring-red-500" : "border-white/10 focus:border-secondary"
                       }`}
                     />
-                    {errors.name && <p className="text-red-500 text-xs mt-1.5 font-medium">{errors.name}</p>}
+                    {errors.name && <p id="contact-name-error" className="text-red-500 text-xs mt-1.5 font-medium">{errors.name}</p>}
                   </div>
 
                   {/* Email field */}
                   <div>
-                    <label className="block text-xs font-semibold text-white uppercase tracking-wider mb-1.5">
+                    <label htmlFor="contact-email-input" className="block text-xs font-semibold text-white uppercase tracking-wider mb-1.5">
                       Email Address
                     </label>
                     <input
+                      id="contact-email-input"
                       type="email"
                       placeholder="jane.doe@example.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
+                      aria-describedby={errors.email ? "contact-email-error" : undefined}
                       className={`w-full bg-[#0d101c] border rounded-lg px-3.5 py-2.5 text-white placeholder-gray-600 focus:outline-none text-sm transition-all duration-200 ${
                         errors.email ? "border-red-500 focus:ring-1 focus:ring-red-500" : "border-white/10 focus:border-secondary"
                       }`}
                     />
-                    {errors.email && <p className="text-red-500 text-xs mt-1.5 font-medium">{errors.email}</p>}
+                    {errors.email && <p id="contact-email-error" className="text-red-500 text-xs mt-1.5 font-medium">{errors.email}</p>}
                   </div>
 
                   {/* Subject field */}
                   <div>
-                    <label className="block text-xs font-semibold text-white uppercase tracking-wider mb-1.5">
+                    <label htmlFor="contact-subject-select" className="block text-xs font-semibold text-white uppercase tracking-wider mb-1.5">
                       Inquiry Type
                     </label>
                     <select
+                      id="contact-subject-select"
                       value={subject}
                       onChange={(e) => setSubject(e.target.value)}
                       className="w-full bg-[#0d101c] border border-white/10 rounded-lg px-3.5 py-2.5 text-white focus:outline-none focus:border-secondary text-sm"
@@ -146,19 +151,21 @@ export default function Contact() {
 
                   {/* Message field */}
                   <div>
-                    <label className="block text-xs font-semibold text-white uppercase tracking-wider mb-1.5">
+                    <label htmlFor="contact-message-input" className="block text-xs font-semibold text-white uppercase tracking-wider mb-1.5">
                       Detailed Message
                     </label>
                     <textarea
+                      id="contact-message-input"
                       rows="5"
                       placeholder="Please write details about your inquiry..."
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
+                      aria-describedby={errors.message ? "contact-message-error" : undefined}
                       className={`w-full bg-[#0d101c] border rounded-lg px-3.5 py-2.5 text-white placeholder-gray-600 focus:outline-none text-sm transition-all duration-200 resize-none ${
                         errors.message ? "border-red-500 focus:ring-1 focus:ring-red-500" : "border-white/10 focus:border-secondary"
                       }`}
                     />
-                    {errors.message && <p className="text-red-500 text-xs mt-1.5 font-medium">{errors.message}</p>}
+                    {errors.message && <p id="contact-message-error" className="text-red-500 text-xs mt-1.5 font-medium">{errors.message}</p>}
                   </div>
 
                   <Button type="submit" variant="primary" className="w-full mt-2">

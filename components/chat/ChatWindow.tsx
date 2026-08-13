@@ -7,6 +7,7 @@ import ScrollAnchor from "./ScrollAnchor";
 import JumpToLatestButton from "./JumpToLatestButton";
 import OnboardingState from "@/components/resilience/OnboardingState";
 import SlowResponseCard from "@/components/resilience/SlowResponseCard";
+import AriaLiveAnnouncer from "./AriaLiveAnnouncer";
 
 interface ChatWindowProps {
   messages: ChatMessageType[];
@@ -59,6 +60,8 @@ export default function ChatWindow({
 
   // Determine effective messages list based on client mount state to prevent SSR/client hydration mismatch
   const displayMessages = isMounted ? messages : [];
+  
+  const lastAssistantMessage = [...displayMessages].reverse().find((m) => m.role === "assistant");
 
   return (
     <div className="relative flex-1 w-full h-full flex flex-col min-h-0 overflow-hidden">
@@ -68,7 +71,6 @@ export default function ChatWindow({
         onScroll={handleScroll}
         className="flex-1 w-full overflow-y-auto px-4 py-6 sm:px-6 space-y-4 scroll-smooth"
         role="log"
-        aria-live="polite"
         aria-label="Chat conversation history"
       >
         {displayMessages.length === 0 ? (
@@ -92,6 +94,13 @@ export default function ChatWindow({
           </div>
         )}
       </div>
+
+      {/* Visually hidden screen reader announcer */}
+      <AriaLiveAnnouncer
+        content={lastAssistantMessage?.content || ""}
+        isStreaming={isStreaming && lastAssistantMessage?.status === "streaming"}
+        status={lastAssistantMessage?.status}
+      />
 
       {/* Floating Jump to Latest Button */}
       <JumpToLatestButton

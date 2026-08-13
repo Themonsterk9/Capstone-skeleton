@@ -91,6 +91,7 @@ export default function ButtonDemo() {
 
       <Section>
         <Container>
+          <h2 className="sr-only">Interactive Button Demos & Specifications</h2>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
             {/* Column 1 & 2: Interactive Playground */}
             <div className="lg:col-span-2 space-y-6">

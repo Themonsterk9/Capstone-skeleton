@@ -205,10 +205,11 @@ export default function Dashboard() {
               <Card title="Log New Flight" subtitle="Add segment to calculator" hoverable={false}>
                 <form onSubmit={handleAddFlight} className="flex flex-col gap-4">
                   <div>
-                    <label className="block text-xs font-semibold text-white uppercase tracking-wider mb-1.5">
+                    <label htmlFor="airline-select" className="block text-xs font-semibold text-white uppercase tracking-wider mb-1.5">
                       Airline Carrier
                     </label>
                     <select
+                      id="airline-select"
                       value={airline}
                       onChange={(e) => setAirline(e.target.value)}
                       className="w-full bg-[#0d101c] border border-white/10 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-secondary text-sm"
@@ -223,10 +224,11 @@ export default function Dashboard() {
 
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs font-semibold text-white uppercase tracking-wider mb-1.5">
+                      <label htmlFor="flight-no-input" className="block text-xs font-semibold text-white uppercase tracking-wider mb-1.5">
                         Flight No.
                       </label>
                       <input
+                        id="flight-no-input"
                         type="text"
                         placeholder="DL123"
                         required
@@ -236,10 +238,11 @@ export default function Dashboard() {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-white uppercase tracking-wider mb-1.5">
+                      <label htmlFor="miles-input" className="block text-xs font-semibold text-white uppercase tracking-wider mb-1.5">
                         Miles
                       </label>
                       <input
+                        id="miles-input"
                         type="number"
                         placeholder="3500"
                         required
@@ -253,10 +256,11 @@ export default function Dashboard() {
 
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs font-semibold text-white uppercase tracking-wider mb-1.5">
+                      <label htmlFor="from-code-input" className="block text-xs font-semibold text-white uppercase tracking-wider mb-1.5">
                         Departure (From)
                       </label>
                       <input
+                        id="from-code-input"
                         type="text"
                         placeholder="JFK"
                         required
@@ -267,10 +271,11 @@ export default function Dashboard() {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-white uppercase tracking-wider mb-1.5">
+                      <label htmlFor="to-code-input" className="block text-xs font-semibold text-white uppercase tracking-wider mb-1.5">
                         Arrival (To)
                       </label>
                       <input
+                        id="to-code-input"
                         type="text"
                         placeholder="LHR"
                         required
@@ -299,8 +304,9 @@ export default function Dashboard() {
                 {/* Filter and Sort actions */}
                 <div className="flex flex-wrap items-center gap-3">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-text-secondary whitespace-nowrap">Filter:</span>
+                    <label htmlFor="filter-airline-select" className="text-xs text-text-secondary whitespace-nowrap">Filter:</label>
                     <select
+                      id="filter-airline-select"
                       value={filterAirline}
                       onChange={(e) => setFilterAirline(e.target.value)}
                       className="bg-white/5 border border-white/10 rounded-lg px-2.5 py-1 text-xs text-white focus:outline-none focus:border-secondary"
@@ -312,8 +318,9 @@ export default function Dashboard() {
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-text-secondary whitespace-nowrap">Sort:</span>
+                    <label htmlFor="sort-by-select" className="text-xs text-text-secondary whitespace-nowrap">Sort:</label>
                     <select
+                      id="sort-by-select"
                       value={sortBy}
                       onChange={(e) => setSortBy(e.target.value)}
                       className="bg-white/5 border border-white/10 rounded-lg px-2.5 py-1 text-xs text-white focus:outline-none focus:border-secondary"

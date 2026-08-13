@@ -55,6 +55,7 @@ export default function Features() {
 
       <Section variant="default">
         <Container>
+          <h2 className="sr-only">FlyRank Feature Details</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             {featuresList.map((feature, idx) => (
               <Card
@@ -82,9 +83,9 @@ export default function Features() {
       {/* CTA Box */}
       <Section variant="glass" className="my-12">
         <Container className="text-center">
-          <h3 className="text-2xl font-bold font-display text-white mb-4">
+          <h2 className="text-2xl font-bold font-display text-white mb-4">
             Ready to optimize your travel status?
-          </h3>
+          </h2>
           <p className="text-text-secondary max-w-lg mx-auto text-sm md:text-base mb-8">
             Get instant access to our dashboard and start calculating qualification paths for your next elite status level.
           </p>

@@ -11,6 +11,8 @@ import remarkGfm from "remark-gfm";
 import OfflineBanner from "@/components/resilience/OfflineBanner";
 import SlowResponseCard from "@/components/resilience/SlowResponseCard";
 import OnboardingState from "@/components/resilience/OnboardingState";
+import AriaLiveAnnouncer from "./AriaLiveAnnouncer";
+import StopButton from "./StopButton";
 
 // ─── Suggested Prompts ─────────────────────────────────────────────────────────
 const SUGGESTED_PROMPTS = [
@@ -179,7 +181,15 @@ export default function ToolChatPage() {
     }
   };
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isStreaming && input.trim()) {
+      sendMessage();
+    }
+  };
+
   const displayMessages = isMounted ? messages : [];
+  const lastAssistantMessage = [...displayMessages].reverse().find((m) => m.role === "assistant");
 
   return (
     <div className="flex-1 flex flex-col w-full h-[calc(100vh-4rem)] bg-bg-dark text-text-primary overflow-hidden">
@@ -188,7 +198,7 @@ export default function ToolChatPage() {
         <div className="max-w-5xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-600 to-indigo-600 flex items-center justify-center shadow-glow-secondary">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className="w-5 h-5 text-white">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className="w-5 h-5 text-white" width="20" height="20">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
               </svg>
             </div>
@@ -250,7 +260,6 @@ export default function ToolChatPage() {
         ref={containerRef}
         className="flex-1 w-full overflow-y-auto px-4 py-6 sm:px-6 scroll-smooth"
         role="log"
-        aria-live="polite"
         aria-label="SEO Audit chat conversation"
       >
         <div className="max-w-4xl mx-auto">
@@ -288,10 +297,17 @@ export default function ToolChatPage() {
         </div>
       </div>
 
+      {/* Visually hidden screen reader announcer */}
+      <AriaLiveAnnouncer
+        content={lastAssistantMessage?.content || ""}
+        isStreaming={isStreaming && lastAssistantMessage?.status === "streaming"}
+        status={lastAssistantMessage?.status}
+      />
+
       {/* Input Bar */}
       <div className="shrink-0 p-4 border-t border-border-dark bg-[#07080d]/95 backdrop-blur-md">
         <div className="max-w-4xl mx-auto">
-          <div className="flex items-end gap-3 glass-panel rounded-2xl border border-white/10 px-4 py-3 focus-within:border-cyan-500/30 transition-colors">
+          <form onSubmit={handleSubmit} className="flex items-end gap-3 glass-panel rounded-2xl border border-white/10 px-4 py-3 focus-within:border-cyan-500/30 transition-colors">
             <textarea
               ref={textareaRef}
               id="tool-chat-input"
@@ -305,28 +321,22 @@ export default function ToolChatPage() {
               aria-label="Message input for SEO audit chat"
             />
             {isStreaming ? (
-              <button
-                onClick={stopGeneration}
-                className="flex-shrink-0 p-2 rounded-xl bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 text-red-400 hover:text-red-300 transition-colors"
-                aria-label="Stop generation"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" className="w-4 h-4">
-                  <rect x="6" y="6" width="12" height="12" rx="2" />
-                </svg>
-              </button>
+              <div className="pb-1 pr-1 shrink-0">
+                <StopButton onStop={stopGeneration} />
+              </div>
             ) : (
               <button
-                onClick={() => sendMessage()}
+                type="submit"
                 disabled={!input.trim()}
-                className="flex-shrink-0 p-2 rounded-xl bg-gradient-to-br from-cyan-500 to-indigo-600 text-white shadow-lg shadow-cyan-900/30 hover:from-cyan-400 hover:to-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                className="flex-shrink-0 p-2.5 rounded-xl bg-gradient-to-br from-cyan-500 to-indigo-600 text-white shadow-lg shadow-cyan-900/30 hover:from-cyan-400 hover:to-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 transition-all"
                 aria-label="Send message"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4" width="16" height="16">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
                 </svg>
               </button>
             )}
-          </div>
+          </form>
           <p className="text-center text-[10px] text-gray-600 mt-2">
             Press Enter to send · Shift+Enter for new line · Powered by AI SDK Tool Calling
           </p>

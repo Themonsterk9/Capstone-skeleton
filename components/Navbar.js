@@ -38,6 +38,8 @@ export default function Navbar() {
                   strokeWidth={2}
                   stroke="currentColor"
                   className="w-5 h-5 text-white"
+                  width="20"
+                  height="20"
                 >
                   <path
                     strokeLinecap="round"
@@ -53,13 +55,14 @@ export default function Navbar() {
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-6">
+          <nav aria-label="Main navigation" className="hidden md:flex items-center gap-6">
             {NAV_LINKS.map((link) => {
               const isActive = pathname === link.href;
               return (
                 <Link
                   key={link.href}
                   href={link.href}
+                  aria-current={isActive ? "page" : undefined}
                   className={cn(
                     "text-sm font-medium transition-all duration-200 relative py-1.5 flex items-center gap-1.5",
                     isActive
@@ -104,6 +107,8 @@ export default function Navbar() {
                   viewBox="0 0 24 24"
                   strokeWidth="1.5"
                   stroke="currentColor"
+                  width="24"
+                  height="24"
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -114,6 +119,8 @@ export default function Navbar() {
                   viewBox="0 0 24 24"
                   strokeWidth="1.5"
                   stroke="currentColor"
+                  width="24"
+                  height="24"
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
                 </svg>
@@ -124,7 +131,8 @@ export default function Navbar() {
       </Container>
 
       {/* Mobile Menu Panel */}
-      <div
+      <nav
+        aria-label="Mobile navigation"
         className={cn(
           "md:hidden transition-all duration-300 ease-in-out border-b border-border-dark bg-[#07080d]",
           mobileMenuOpen ? "max-h-screen opacity-100 py-4" : "max-h-0 opacity-0 overflow-hidden"
@@ -137,6 +145,7 @@ export default function Navbar() {
               <Link
                 key={link.href}
                 href={link.href}
+                aria-current={isActive ? "page" : undefined}
                 onClick={() => setMobileMenuOpen(false)}
                 className={cn(
                   "block px-3 py-2 rounded-md text-base font-medium transition-all duration-200",
@@ -160,7 +169,7 @@ export default function Navbar() {
             </Button>
           </div>
         </Container>
-      </div>
+      </nav>
     </header>
   );
 }
