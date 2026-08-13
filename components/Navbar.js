@@ -13,6 +13,7 @@ const NAV_LINKS = [
   { href: "/features", label: "Features" },
   { href: "/dashboard", label: "Dashboard" },
   { href: "/chat", label: "AI Chat" },
+  { href: "/button-demo", label: "Button Demo", badge: "Demo" },
   { href: "/seo-audit", label: "SEO Audit", badge: "New" },
   { href: "/contact", label: "Contact" },
   { href: "/health", label: "Health" },
