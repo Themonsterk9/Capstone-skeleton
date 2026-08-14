@@ -1,45 +1,18 @@
 import React from "react";
 import Container from "@/components/Container";
 import Section from "@/components/Section";
-import Button from "@/components/Button";
 import Card from "@/components/Card";
+import AetherFlowHero from "@/components/AetherFlowHero/AetherFlowHero";
 
 export default function Home() {
   return (
     <div className="relative overflow-hidden flex-grow flex flex-col justify-center">
-      {/* Decorative ambient background glows */}
-      <div className="glow-backdrop-cyan top-[10%] left-[-5%] animate-pulse-slow" />
-      <div className="glow-backdrop-indigo top-[40%] right-[-5%] animate-pulse-slow" />
-
-      {/* Hero Section */}
-      <Section variant="gradient" className="pt-20 pb-16 md:pt-32 md:pb-24">
-        <Container className="text-center relative z-10 flex flex-col items-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/10 bg-white/5 mb-6 animate-pulse">
-            <span className="w-2 h-2 rounded-full bg-secondary" />
-            <span className="text-xs font-semibold tracking-wide text-gray-300">
-              FlyRank Foundations V1.0 Active
-            </span>
-          </div>
-
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white font-display tracking-tight max-w-4xl leading-tight">
-            Optimize Your Flight Ranks with{" "}
-            <span className="neon-text-gradient">Precision Analytics</span>
-          </h1>
-
-          <p className="text-lg md:text-xl text-text-secondary max-w-2xl mt-6 leading-relaxed">
-            Unleash the full potential of your elite status. Track flights, analyze complex airline tier upgrades, and evaluate routes using our high-performance ranking engine.
-          </p>
-
-          <div className="flex flex-col sm:flex-row items-center gap-4 mt-10">
-            <Button variant="primary" size="lg" href="/dashboard">
-              Launch Dashboard
-            </Button>
-            <Button variant="secondary" size="lg" href="/features">
-              Explore Features
-            </Button>
-          </div>
-        </Container>
-      </Section>
+      {/* ── Aether Flow Hero ─────────────────────────────────────
+          Fullscreen interactive GLSL shader hero.
+          Contains its own h1, introduction, and CTAs.
+          Replaces the previous CSS-glow hero section.
+      ─────────────────────────────────────────────────────────── */}
+      <AetherFlowHero />
 
       {/* Stats Dashboard Preview Section */}
       <Section className="py-6 border-t border-border-dark">

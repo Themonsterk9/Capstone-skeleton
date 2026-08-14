@@ -72,12 +72,15 @@ export default function AriaLiveAnnouncer({
     }
   }, [content, isStreaming, status, assistantName]);
 
-  // Reset when content is cleared
   useEffect(() => {
+    // Reset when content is cleared between conversations
     if (!content && !isStreaming) {
-      setAnnouncement("");
-      lastAnnouncedLength.current = 0;
-      wasStreaming.current = false;
+      const timer = setTimeout(() => {
+        setAnnouncement("");
+        lastAnnouncedLength.current = 0;
+        wasStreaming.current = false;
+      }, 0);
+      return () => clearTimeout(timer);
     }
   }, [content, isStreaming]);
 

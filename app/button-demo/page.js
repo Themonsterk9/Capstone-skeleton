@@ -314,7 +314,7 @@ export default function ButtonDemo() {
                   </li>
                   <li>
                     <span className="text-white font-semibold">Aria Announcements:</span> Employs{" "}
-                    <code>aria-live="assertive"</code> and <code>aria-busy</code> to communicate server telemetry
+                    <code>aria-live=&quot;assertive&quot;</code> and <code>aria-busy</code> to communicate server telemetry
                     to screen readers.
                   </li>
                   <li>

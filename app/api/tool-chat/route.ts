@@ -79,8 +79,7 @@ function createFallbackToolStream(userPrompt: string): Response {
         // 4. Execute tool locally
         let auditResult;
         try {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          auditResult = await (seoAuditTool.execute as any)({ url: targetUrl });
+          auditResult = await (seoAuditTool.execute as (args: { url: string }) => Promise<unknown>)({ url: targetUrl });
         } catch {
           auditResult = {
             url: targetUrl,

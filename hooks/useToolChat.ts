@@ -33,8 +33,7 @@ function useIsMounted(): boolean {
  */
 interface StreamChunk {
   type: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  data: any;
+  data: unknown;
 }
 
 function parseStreamLine(line: string): StreamChunk | null {
@@ -353,7 +352,7 @@ export function useToolChat() {
 
               // type "e" = error
               if (type === "e") {
-                const errorMessage = typeof data === "string" ? data : data?.message ?? "Tool execution failed";
+                const errorMessage = typeof data === "string" ? data : (data !== null && typeof data === "object" && "message" in data ? String((data as { message: unknown }).message) : null) ?? "Tool execution failed";
                 toolParts = toolParts.map((p) =>
                   p.state === "streaming" || p.state === "input"
                     ? ({ ...p, state: "error" as const, error: errorMessage } as KnownToolPart)

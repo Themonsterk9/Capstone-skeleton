@@ -3,12 +3,15 @@
 import { useState, useEffect } from "react";
 
 export function useNetworkStatus() {
-  const [isOnline, setIsOnline] = useState<boolean>(true);
+  // Initialize from navigator.onLine lazily so we avoid calling setState
+  // synchronously inside a useEffect body (react-hooks/set-state-in-effect).
+  const [isOnline, setIsOnline] = useState<boolean>(() => {
+    if (typeof window === "undefined") return true;
+    return navigator.onLine;
+  });
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-
-    setIsOnline(navigator.onLine);
 
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);

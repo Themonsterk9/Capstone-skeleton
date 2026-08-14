@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import Link from "next/link";
 import Container from "@/components/Container";
 
 interface ErrorPageProps {
@@ -47,12 +48,12 @@ export default function ErrorPage({ error, reset }: ErrorPageProps) {
             </svg>
             Try Again
           </button>
-          <a
+          <Link
             href="/"
             className="px-5 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 text-xs font-semibold transition-colors"
           >
             Return Home
-          </a>
+          </Link>
         </div>
 
         {/* Collapsible Technical Details (No stack traces) */}

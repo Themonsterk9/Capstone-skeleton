@@ -1,0 +1,169 @@
+/* =============================================================
+   AetherFlowHero — isolated component styles
+   All selectors are scoped to .aether-hero-* to avoid collisions
+   with the existing Tailwind design system.
+   ============================================================= */
+
+/* ── Root container ─────────────────────────────────────────── */
+.aether-hero-root {
+  position: relative;
+  width: 100%;
+  /* Responsive hero height: full viewport height capped at 800px */
+  min-height: min(100svh, 800px);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Fallback bg — also used for the static/reduced-motion state */
+  background: #07080d;
+}
+
+/* ── WebGL Canvas ────────────────────────────────────────────── */
+.aether-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  /* Canvas is decorative; pointer-events blocked so text stays
+     clickable even over the canvas element */
+  pointer-events: none;
+  display: block;
+}
+
+/* ── Static fallback — shown when:
+      • WebGL is unavailable
+      • prefers-reduced-motion is set
+   Palette-matched to the Aether shader's color identity.  ─────*/
+.aether-static-fallback {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 130% 80% at 50% -10%,
+    rgba(14, 78, 107, 0.55) 0%,
+    rgba(36, 20, 70, 0.4) 45%,
+    #07080d 75%
+  ),
+  linear-gradient(
+    175deg,
+    #040508 0%,
+    #070b18 35%,
+    #08101e 65%,
+    #07080d 100%
+  );
+}
+
+/* ── Contrast overlay ────────────────────────────────────────── */
+/* A gradient that darkens from the bottom up so that hero text
+   at the vertical center stays readable against bright aurora bands. */
+.aether-contrast-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(7, 8, 13, 0.55) 0%,
+    rgba(7, 8, 13, 0.25) 40%,
+    rgba(7, 8, 13, 0.45) 100%
+  );
+  pointer-events: none;
+}
+
+/* ── Content layer ───────────────────────────────────────────── */
+.aether-content {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 5rem 1.5rem 4rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ── Badge ───────────────────────────────────────────────────── */
+.aether-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.875rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  margin-bottom: 1.5rem;
+}
+
+.aether-badge-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #06b6d4;
+  /* Only animate if the user allows motion */
+  animation: aether-pulse 2.5s ease-in-out infinite;
+}
+
+@keyframes aether-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.5; transform: scale(0.8); }
+}
+
+.aether-badge-text {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: #9ca3af;
+  text-transform: uppercase;
+}
+
+/* ── Headline ────────────────────────────────────────────────── */
+.aether-headline {
+  font-family: var(--font-outfit), system-ui, sans-serif;
+  font-weight: 900;
+  font-size: clamp(2.25rem, 6vw, 4.5rem);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  color: #f3f4f6;
+  max-width: 900px;
+  margin: 0;
+  /* Text shadow improves contrast against bright aurora bands */
+  text-shadow:
+    0 2px 20px rgba(7, 8, 13, 0.8),
+    0 1px 4px rgba(7, 8, 13, 0.6);
+}
+
+.aether-headline-accent {
+  /* Cyan → violet gradient — Aether palette highlight */
+  background: linear-gradient(135deg, #14c8c8 0%, #6366f1 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Description ─────────────────────────────────────────────── */
+.aether-description {
+  font-size: clamp(1rem, 2vw, 1.2rem);
+  line-height: 1.7;
+  color: #d1d5db;
+  max-width: 640px;
+  margin: 1.5rem 0 0;
+  text-shadow: 0 1px 10px rgba(7, 8, 13, 0.7);
+}
+
+/* ── CTA row ─────────────────────────────────────────────────── */
+.aether-cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 2.5rem;
+}
+
+/* ── Reduced-motion overrides ─────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .aether-badge-dot {
+    animation: none;
+    opacity: 1;
+  }
+}
