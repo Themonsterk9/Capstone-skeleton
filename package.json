@@ -2,6 +2,9 @@
   "name": "flyrank-app",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -14,6 +17,7 @@
   "dependencies": {
     "@ai-sdk/google": "^4.0.31",
     "@ai-sdk/openai": "^4.0.27",
+    "@tailwindcss/postcss": "^4",
     "ai": "^7.0.47",
     "framer-motion": "^12.43.0",
     "lucide-react": "^1.28.0",
@@ -21,11 +25,11 @@
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-markdown": "^10.1.0",
-    "remark-gfm": "^4.0.1"
+    "remark-gfm": "^4.0.1",
+    "tailwindcss": "^4"
   },
   "devDependencies": {
     "@playwright/test": "^1.62.1",
-    "@tailwindcss/postcss": "^4",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.4",
@@ -34,7 +38,6 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.11",
     "jsdom": "^30.0.1",
-    "tailwindcss": "^4",
     "vitest": "^4.1.10"
   }
 }
