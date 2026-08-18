@@ -1,11 +1,14 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { streamText, isStepCount } from "ai";
 import { AI_CONFIG } from "@/server/ai/model";
 import { seoAuditTool } from "@/server/tools/seoAudit";
+import { checkRateLimit, getClientIp } from "@/lib/rateLimit";
+import { getCorsHeaders, handleCorsPreflight } from "@/lib/cors";
 
 // Dedicated route for tool-enabled AI chat (FE-07)
 export const dynamic = "force-dynamic";
+export const maxDuration = 60; // Allow 60s for tool analysis execution
 
 const TOOL_SYSTEM_PROMPT = `
 You are FlyRank AI — an elite SEO and web analytics assistant with access to powerful tools.
@@ -21,6 +24,17 @@ Guidelines:
 - Be concise and actionable in your summaries
 - Format any non-tool responses in clean Markdown
 `.trim();
+
+// Input constraints
+const MAX_MESSAGES_COUNT = 30;
+const MAX_MESSAGE_CHAR_LENGTH = 4000;
+const MAX_PAYLOAD_BYTES = 1024 * 100; // 100 KB payload limit
+const RATE_LIMIT_REQUESTS = 20; // 20 requests per minute
+const RATE_LIMIT_WINDOW_MS = 60 * 1000;
+
+export async function OPTIONS(req: NextRequest) {
+  return handleCorsPreflight(req);
+}
 
 /**
  * Extracts a target URL from the user prompt string
@@ -41,7 +55,7 @@ function extractUrlFromPrompt(prompt: string): string {
  * Generates a UI message stream fallback that runs the tool locally
  * when upstream AI providers hit rate limits or 429 quota boundaries.
  */
-function createFallbackToolStream(userPrompt: string): Response {
+function createFallbackToolStream(userPrompt: string, corsHeaders: Record<string, string>): Response {
   const isAuditRequest =
     /https?:\/\/|www\.|\.com|\.org|\.net|\.io|\.dev|audit|analyze|check|review|seo/i.test(
       userPrompt
@@ -154,32 +168,74 @@ I can perform live SEO audits on any website. Simply ask me to **audit a URL** (
       connection: "keep-alive",
       "x-vercel-ai-ui-message-stream": "v1",
       "x-accel-buffering": "no",
+      ...corsHeaders,
     },
   });
 }
 
 export async function POST(req: NextRequest) {
+  const corsHeaders = getCorsHeaders(req.headers.get("origin"));
+
   try {
+    // 1. Rate Limiting Check
+    const clientIp = getClientIp(req);
+    const rateLimit = checkRateLimit(clientIp, RATE_LIMIT_REQUESTS, RATE_LIMIT_WINDOW_MS);
+
+    if (!rateLimit.success) {
+      return NextResponse.json(
+        { error: "Too many requests. Please slow down and try again in a moment." },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(rateLimit.reset),
+            "X-RateLimit-Limit": String(rateLimit.limit),
+            "X-RateLimit-Remaining": "0",
+            "X-RateLimit-Reset": String(rateLimit.reset),
+            ...corsHeaders,
+          },
+        }
+      );
+    }
+
+    // 2. Request Payload Size Check
+    const contentLength = req.headers.get("content-length");
+    if (contentLength && parseInt(contentLength, 10) > MAX_PAYLOAD_BYTES) {
+      return NextResponse.json(
+        { error: "Payload size too large. Maximum allowed request size is 100 KB." },
+        { status: 413, headers: corsHeaders }
+      );
+    }
+
+    // 3. Parse and Validate Request Body
     const body = await req.json().catch(() => null);
 
     if (!body || !Array.isArray(body.messages) || body.messages.length === 0) {
-      return Response.json(
+      return NextResponse.json(
         { error: "Invalid payload. 'messages' array is required." },
-        { status: 400 }
+        { status: 400, headers: corsHeaders }
+      );
+    }
+
+    if (body.messages.length > MAX_MESSAGES_COUNT) {
+      return NextResponse.json(
+        { error: `Too many messages in history. Maximum allowed is ${MAX_MESSAGES_COUNT}.` },
+        { status: 400, headers: corsHeaders }
       );
     }
 
     const { messages } = body;
     const lastMsg = messages[messages.length - 1];
-    const latestUserContent =
+    const rawUserContent =
       lastMsg && typeof lastMsg.content === "string" ? lastMsg.content.trim() : "hello";
+    const latestUserContent = rawUserContent.slice(0, MAX_MESSAGE_CHAR_LENGTH);
 
+    // 4. Validate API key presence
     const geminiKey =
       process.env.GOOGLE_GENERATIVE_AI_API_KEY || process.env.GEMINI_API_KEY;
 
     if (!geminiKey || geminiKey.trim() === "" || geminiKey.includes("your_gemini")) {
       console.warn("[FlyRank ToolChat] API key missing, serving fallback tool stream.");
-      return createFallbackToolStream(latestUserContent);
+      return createFallbackToolStream(latestUserContent, corsHeaders);
     }
 
     const cleanMessages = messages
@@ -193,14 +249,15 @@ export async function POST(req: NextRequest) {
               ? true
               : false)
       )
+      .slice(-10) // Keep last 10 messages for context
       .map((m: { role: string; content: unknown }) => ({
         role: m.role as "user" | "assistant",
         content:
           typeof m.content === "string"
-            ? m.content
+            ? m.content.slice(0, MAX_MESSAGE_CHAR_LENGTH)
             : Array.isArray(m.content)
               ? m.content
-              : String(m.content),
+              : String(m.content).slice(0, MAX_MESSAGE_CHAR_LENGTH),
       }));
 
     try {
@@ -217,7 +274,7 @@ export async function POST(req: NextRequest) {
         toolChoice: "auto",
         stopWhen: isStepCount(3),
         temperature: 0.4,
-        maxRetries: 0, // Fast failover to local execution on 429 quota error
+        maxRetries: 0, // Fast failover to local execution on quota error
         abortSignal: req.signal,
         providerOptions: {
           google: {
@@ -274,7 +331,7 @@ export async function POST(req: NextRequest) {
 
             if (!hasOutput) {
               // Remote stream produced no output — serve local tool execution stream
-              const fallbackRes = createFallbackToolStream(latestUserContent);
+              const fallbackRes = createFallbackToolStream(latestUserContent, corsHeaders);
               const reader = fallbackRes.body?.getReader();
               if (reader) {
                 while (true) {
@@ -288,7 +345,7 @@ export async function POST(req: NextRequest) {
             controller.close();
           } catch (streamErr) {
             console.warn("[FlyRank ToolChat] Remote stream error, switching to local tool execution:", streamErr);
-            const fallbackRes = createFallbackToolStream(latestUserContent);
+            const fallbackRes = createFallbackToolStream(latestUserContent, corsHeaders);
             const reader = fallbackRes.body?.getReader();
             if (reader) {
               while (true) {
@@ -309,14 +366,18 @@ export async function POST(req: NextRequest) {
           connection: "keep-alive",
           "x-vercel-ai-ui-message-stream": "v1",
           "x-accel-buffering": "no",
+          "X-RateLimit-Limit": String(rateLimit.limit),
+          "X-RateLimit-Remaining": String(rateLimit.remaining),
+          ...corsHeaders,
         },
       });
     } catch (apiError) {
       console.warn("[FlyRank ToolChat] Remote AI API error, serving fallback tool stream:", apiError);
-      return createFallbackToolStream(latestUserContent);
+      return createFallbackToolStream(latestUserContent, corsHeaders);
     }
   } catch (err: unknown) {
     console.error("[FlyRank ToolChat Route Exception]", err);
-    return createFallbackToolStream("hello");
+    return createFallbackToolStream("hello", corsHeaders);
   }
 }
+

@@ -1,389 +1,298 @@
-# FlyRank — Capstone Foundations
+# Aether AI (FlyRank)
 
-FlyRank is a premium frequent flyer rank and airport analytics console built using Next.js App Router, Tailwind CSS (v4), and JavaScript. It computes status loyalty tiers, maps equivalent levels across global airline alliances, tracks flight segments, and runs on-demand server diagnostic telemetry.
-
----
-
-## Technical Stack & Architecture
-
-### Technologies Used
-* **Framework**: Next.js 16 (App Router)
-* **Styling**: Tailwind CSS v4 (CSS-first configuration with `@theme` styling)
-* **Language**: JavaScript (ES6+)
-* **Dependencies**: React 19, React DOM 19
-
-### Project Directory Structure
-```
-d:\Capstone skeleton/
-├── .env.local             # Local environment configurations (ignored by Git)
-├── .env.example           # Environment template for references
-├── jsconfig.json          # JavaScript import mappings (@/* -> ./*)
-├── next.config.mjs        # Next.js configurations
-├── postcss.config.mjs     # PostCSS styling directives
-├── package.json           # Installed node packages and scripts
-├── README.md              # Project documentation
-├── app/                   # Next.js App Router Page components
-│   ├── layout.js          # Root layout with fonts and metadata
-│   ├── page.js            # Landing page featuring cards & key metrics
-│   ├── globals.css        # Tailwind v4 directives, glass panels, and glow keyframes
-│   ├── not-found.js       # Premium responsive 404 page
-│   ├── about/             # About FlyRank and team milestone timeline
-│   │   └── page.js
-│   ├── dashboard/         # Fully interactive clientside flight logger dashboard
-│   │   └── page.js
-│   ├── features/          # Platform features grid view
-│   │   └── page.js
-│   ├── contact/           # Validated contact form with interactive success state
-│   │   └── page.js
-│   ├── button-demo/       # Interactive playground for stateful buttons [NEW]
-│   │   └── page.js
-│   ├── health/            # SSR health status page
-│   │   ├── page.js
-│   │   ├── loading.js     # Telemetry fetching loader fallback
-│   │   └── error.js      # SSR fetching error boundary
-│   └── api/
-│       └── health/        # REST API endpoint for system status checks
-│           └── route.js
-├── components/            # Reusable UI component library
-│   ├── Navbar.js          # Desktop/Mobile responsive active-link header
-│   ├── Footer.js          # Sleek multi-column footer
-│   ├── Button.js          # Multi-variant responsive buttons
-│   ├── AnimatedStatefulButton.tsx # Motion-with-intent stateful button [NEW]
-│   ├── Card.js            # Glassmorphic display boxes with hover states
-│   ├── Container.js       # Layout grid wrapper
-│   ├── Section.js         # Semantic section spacing dividers
-│   ├── PageHeader.js      # Glow header with gradient titles
-│   ├── PlaceholderCard.js # Skeleton loaders
-│   ├── Loading.js         # Centered glowing spinners
-│   └── EmptyState.js      # Default data placeholder panels
-├── hooks/                 # Custom React hooks folder
-├── lib/                   # Utility libraries and classes
-│   └── utils.js           # classNames combination merger
-└── services/              # Server-side APIs and computation layers
-    └── healthService.js   # Server system diagnostics check
-```
+A state-of-the-art, production-ready web application built with **Next.js 16 (App Router)**, **React 19**, **Tailwind CSS v4**, and the **Vercel AI SDK 4**. Aether AI combines real-time streaming AI conversation, autonomous tool-enabled SEO auditing with 4-stage Generative UI, an interactive WebGL GLSL aurora shader, comprehensive UI resilience controls, and sentence-buffered screen reader accessibility.
 
 ---
 
-## Installation & Setup
+## Overview
 
-### Prerequisites
-* **Node.js**: `v18.x` or newer (Recommended: `v20.x+`)
-* **npm**: `v9.x` or newer
+Aether AI solves the problem of modern AI-driven web analytics and intelligence interfaces. It provides:
+1. **Interactive AI Assistance**: Instant token-by-token streaming response generation with fallback stream reliability.
+2. **Autonomous Tool Calling**: Automated website auditing (`seoAudit` tool) that analyzes URLs, computes Core Web Vitals, inspects meta tags and heading trees, flags missing alt attributes and broken links, and generates structured report cards.
+3. **Resilient UX**: Production-grade handling for network disconnections, HTTP 429 rate limits with active countdowns, HTTP 5xx server errors, slow thinking states (>2s), empty prompt validations, and screen-reader stream storm prevention.
 
-### Getting Started
-1. Clone the repository to your local workspace directory.
-2. Install the package dependencies:
-   ```bash
-   npm install
-   ```
-3. Copy the environment variables template and configure the values:
-   ```bash
-   cp .env.example .env.local
-   ```
+---
 
-### Running Locally
-To launch the application in development mode with Turbopack:
-```bash
-npm run dev
+## Features
+
+- **Interactive Aether Flow GLSL Hero**: Raw WebGL aurora/domain-warp shader (`shaders/aetherFlow.frag`) with mouse interaction, visibility change pausing, static CSS gradient fallback, and `prefers-reduced-motion` compliance.
+- **Streaming AI Assistant (`/chat`)**: Real-time token streaming powered by Google Gemini 2.0 Flash (`@ai-sdk/google`) with automatic local fallback stream when API keys or quotas are unavailable.
+- **Tool-Enabled SEO Audit Assistant (`/seo-audit`)**: Autonomous AI tool calling using `streamText` with the `seoAudit` tool, rendering a 4-stage Generative UI lifecycle (`streaming` → `input` → `output` → `error`).
+- **Production Rate Limiting & Security**: In-memory sliding window rate limiter (`lib/rateLimit.ts`), 100 KB payload size enforcement, message history caps, CORS preflight handling (`lib/cors.ts`), and `maxDuration` execution limits.
+- **Sentence-Buffered Screen Reader Announcer**: `AriaLiveAnnouncer` component buffers streaming token fragments into completed sentences, announcing polite live updates without cluttering screen reader speech queues.
+- **Animated Stateful Button (`/button-demo`)**: Custom stateful motion button component visualizing idle, hover, pressed, loading, emerald success, amber error (shake), and reduced-motion states.
+- **System Health Diagnostics (`/health`)**: Server-rendered and REST API diagnostics (`/api/health`) tracking database connectivity, latency, memory utilization, and uptime.
+- **Contact & Flight Logger Dashboard (`/contact`, `/dashboard`)**: Validated contact form with interactive success state and client-side flight status dashboard.
+
+---
+
+## Screenshots
+
+> *Screen captures can be placed inside `docs/screenshots/`*
+
+- **Aether Flow Hero Page**: `![Aether Flow Landing Page](docs/screenshots/landing-page.png)`
+- **Streaming AI Chat Interface**: `![Streaming AI Chat](docs/screenshots/chat-interface.png)`
+- **SEO Audit Tool & Generative UI Report**: `![SEO Audit Report](docs/screenshots/seo-audit-report.png)`
+- **Resilience Cards & Rate Limit Cooldown**: `![Resilience Cards](docs/screenshots/resilience-cards.png)`
+
+---
+
+## Live Demo
+
+Production URL:
+
+`<ADD_AFTER_VERCEL_DEPLOYMENT>`
+
+---
+
+## Tech Stack
+
+| Category | Technology |
+| --- | --- |
+| **Framework** | Next.js 16.2.11 (App Router, Turbopack) |
+| **Frontend Library** | React 19.2.4, React DOM 19.2.4 |
+| **Styling** | Tailwind CSS v4, PostCSS |
+| **Animation & Visuals** | Framer Motion 12.43, Lucide React, WebGL / GLSL Shaders |
+| **Markdown Rendering** | React Markdown 10.1, Remark GFM 4.0 |
+| **AI / LLM Framework** | Vercel AI SDK 7.0 (`ai`), `@ai-sdk/google` (Gemini 2.0 Flash) |
+| **Schema Validation** | Zod |
+| **Testing** | Vitest 4.1, React Testing Library 16.3, Playwright 1.62 (E2E) |
+| **Code Quality** | ESLint 9, TypeScript 5.8 |
+| **Deployment Target** | Vercel / Render |
+
+---
+
+## Architecture
+
+```text
+User Browser
+   │
+   ├──► Next.js 16 App Router Frontend (React 19)
+   │     ├── Landing Page (WebGL GLSL Hero Canvas)
+   │     ├── AI Streaming Chat (/chat)
+   │     ├── SEO Audit Tool Chat (/seo-audit)
+   │     └── Diagnostics Dashboard (/health)
+   │
+   └──► Next.js Route Handlers (/api/chat, /api/tool-chat, /api/health)
+         │
+         ├── Rate Limiter (lib/rateLimit.ts - 20 req/min sliding window)
+         ├── CORS & Security Headers (lib/cors.ts)
+         ├── Payload Validation (100 KB max, 30 msgs max, 4000 chars/msg)
+         │
+         ├── Vercel AI SDK (streamText)
+         │     ├── Primary: Google Gemini 2.0 Flash (GOOGLE_GENERATIVE_AI_API_KEY)
+         │     └── Secondary/Fallback: Local Fallback Stream Generator
+         │
+         └── SSE / UI Message Stream Protocol ──► React Streaming UI
 ```
-Open [http://localhost:3000](http://localhost:3000) in your browser to view the application.
 
-### Production Build
-To compile the application in optimized production mode and check for errors:
-```bash
-npm run build
-```
+---
+
+## AI Architecture
+
+- **LLM Provider & Configuration**: Defined in `server/ai/model.ts`. Uses `@ai-sdk/google` (`gemini-2.0-flash`) as the primary streaming provider with fail-fast retries (`maxRetries: 0`) to transition seamlessly to the local fallback generator if rate limits or quota boundaries occur.
+- **Prompt System**: Managed via `server/ai/systemPrompt.ts`. Enforces domain expertise, markdown formatting rules, and concise structured output.
+- **Message Pipeline**: Incoming request bodies are sanitized, history is capped at the last 10 conversation turns, and individual messages are truncated at 4,000 characters before sending to the model.
+- **Streaming Response**: Delivered via Server-Sent Events / UI message streams (`x-vercel-ai-ui-message-stream: v1`). Frontend hooks (`useStreamingChat` and `useToolChat`) parse incoming token chunks and stream deltas into React state.
+- **Tool Calling & Generative UI**: `/api/tool-chat` registers the `seoAudit` tool (`server/tools/seoAudit.ts`). AI SDK handles tool invocation via `streamText` with `stopWhen: isStepCount(3)`. `useToolChat` parses tool call deltas and updates `ToolRenderer` through 4 lifecycle states:
+  1. `streaming` → `ToolLoadingCard` (Framer Motion skeleton)
+  2. `input` → `ToolInputCard` (Clean URL display)
+  3. `output` → `SEOAuditResult` (Score arc, Core Web Vitals, metadata, H1-H6 heading tree, broken link table, recommendations)
+  4. `error` → `ToolErrorCard` (Retry card)
 
 ---
 
 ## Environment Variables
-The application utilizes the following parameters. Configure them in `.env.local`:
 
-| Variable Name | Description | Example Value |
-| :--- | :--- | :--- |
-| `NEXT_PUBLIC_APP_URL` | Base application routing URL | `http://localhost:3000` |
-| `NEXT_PUBLIC_API_VERSION`| API version tracking prefix | `v1` |
-| `HEALTH_CHECK_TIMEOUT` | Max delay allowed during SSR calls | `5000` |
-| `DATABASE_URL` | Local mock database routing connection | `mock://localhost:5432/flyrank_dev` |
+| Variable | Required | Purpose | Safe Example |
+| --- | --- | --- | --- |
+| `NEXT_PUBLIC_APP_URL` | Yes | Base public application URL for CORS and links | `http://localhost:3000` |
+| `NEXT_PUBLIC_API_VERSION` | Yes | Public API version tracking prefix | `v1` |
+| `HEALTH_CHECK_TIMEOUT` | No | System diagnostic timeout threshold (ms) | `5000` |
+| `DATABASE_URL` | No | Database connection string (server-side only) | `mock://localhost:5432/flyrank` |
+| `GEMINI_API_KEY` | Recommended | Google Gemini API key (server-side only) | `your_gemini_api_key_here` |
+| `GOOGLE_GENERATIVE_AI_API_KEY` | Alternative | Alternative Google Gemini API key | `your_google_api_key_here` |
+| `OPENAI_API_KEY` | Optional | Alternative OpenAI API key | `your_openai_api_key_here` |
+| `AI_MODEL` | No | Primary AI model identifier | `gemini-2.0-flash` |
 
----
-
-## Future Execution Phases
-1. **Phase 2 (Milestone Yield Computations)**: Integrate real airline fare databases to check qualification miles instantly.
-2. **Phase 3 (Alliance Promotions)**: Add status matching integrations and alert notifications when alliances launch fast-track challenges.
-3. **Phase 4 (Offline Operations)**: Enable progressive web application configurations and localStorage sync to log flights without internet connectivity.
+*Note: NEVER commit real API keys or credentials to Git.*
 
 ---
 
-## Screenshots Placeholder
-*Once deployed to Vercel, attach screenshots showing mobile, tablet, and desktop views of the Interactive Flight Log Console.*
+## Local Development
+
+### Prerequisites
+- **Node.js**: `v20.x` or newer recommended
+- **npm**: `v10.x` or newer
+
+### Setup & Run
+```bash
+# 1. Clone the repository
+git clone <repository-url>
+cd flyrank-app
+
+# 2. Install dependencies
+npm install
+
+# 3. Configure local environment variables
+cp .env.example .env.local
+
+# 4. Start local development server with Turbopack
+npm run dev
+
+# 5. Open http://localhost:3000 in your browser
+```
+
+### Verification Scripts
+```bash
+# Run production build (TypeScript & Next.js compilation)
+npm run build
+
+# Run ESLint check
+npm run lint
+
+# Run Vitest unit & component tests
+npm run test:run
+```
 
 ---
 
-## FE-07: AI SDK Tool Calling with Generative UI
+## Production Deployment
 
-FlyRank now includes a production-quality **SEO Audit Assistant** powered by AI SDK v7 tool calling with beautiful Generative UI. Access it at [`/seo-audit`](http://localhost:3000/seo-audit).
+### Manual Vercel Deployment
+1. Import your Git repository into the **Vercel Dashboard**.
+2. Keep default Framework Preset as **Next.js**.
+3. Set Root Directory to `./`.
+4. Add the following Production Environment Variables in Vercel:
+   - `NEXT_PUBLIC_APP_URL`: `https://your-app.vercel.app`
+   - `GEMINI_API_KEY`: Your production Google Gemini API key
+   - `AI_MODEL`: `gemini-2.0-flash`
+5. Deploy. Vercel automatically detects Next.js 16 App Router and configures serverless functions and `maxDuration` timeouts.
 
-### Tool: `seoAudit`
+### Manual Render Deployment
+1. Create a new **Web Service** on Render connected to your repository.
+2. Select **Node** environment.
+3. Build Command: `npm install && npm run build`
+4. Start Command: `npm run start`
+5. Add Environment Variables:
+   - `NEXT_PUBLIC_APP_URL`: `https://your-service.onrender.com`
+   - `GEMINI_API_KEY`: Your production Google Gemini API key
+   - `AI_MODEL`: `gemini-2.0-flash`
 
-| Property | Value |
-|---|---|
-| **Tool Name** | `seoAudit` |
-| **Route** | `POST /api/tool-chat` |
-| **Tool File** | `server/tools/seoAudit.ts` |
-| **Description** | Analyzes a webpage and returns a comprehensive structured SEO report |
+---
 
-### Schema
+## Security
 
-**Input Schema** (Zod):
-```typescript
-z.object({
-  url: z.string().url()  // Full URL of the webpage to audit
-})
-```
+Production protections implemented across all API and AI endpoints:
+- **Rate Limiting**: Sliding window rate limiter in `lib/rateLimit.ts` enforcing a maximum of 20 requests per minute per IP address on `/api/chat` and `/api/tool-chat`. Returns HTTP 429 with `Retry-After` headers.
+- **Request Payload Bounds**: Capped at 100 KB payload size limit (`413 Payload Too Large`).
+- **Input Sanitization & Length Limits**: Maximum 30 messages in history; individual message prompts are truncated at 4,000 characters.
+- **Streaming Duration Limits (`maxDuration`)**: Configured `maxDuration = 30` (30 seconds) for `/api/chat` and `maxDuration = 60` (60 seconds) for `/api/tool-chat` matching Vercel serverless execution bounds.
+- **CORS & Preflight Handling**: Implemented in `lib/cors.ts` handling `OPTIONS` preflights and enforcing allowed origins without wildcard `*` wildcard credentials issues.
+- **Security Headers**: Returns `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, and `Referrer-Policy: strict-origin-when-cross-origin`.
+- **Safe Error Responses**: Detailed errors logged to server console only. Client responses receive sanitized error messages with zero stack traces, internal paths, or exposed secrets.
 
-**Output Schema** (Zod):
-```typescript
-z.object({
-  url: z.string().url(),
-  title: z.string(),
-  metaDescription: z.string(),
-  canonical: z.string(),
-  robots: z.string(),
-  language: z.string(),
-  headings: z.array(z.object({ level: z.number(), text: z.string() })),
-  imagesWithoutAlt: z.array(z.object({ src: z.string(), context: z.string() })),
-  brokenLinks: z.array(z.object({ href: z.string(), statusCode: z.number(), text: z.string() })),
-  pageSpeedEstimate: z.object({
-    fcp: z.number(),   // First Contentful Paint (ms)
-    lcp: z.number(),   // Largest Contentful Paint (ms)
-    cls: z.number(),   // Cumulative Layout Shift score
-    ttfb: z.number(),  // Time to First Byte (ms)
-  }),
-  seoScore: z.number().int().min(0).max(100),
-  recommendations: z.array(z.object({
-    priority: z.enum(["critical", "high", "medium", "low"]),
-    category: z.string(),
-    title: z.string(),
-    description: z.string(),
-  })),
-})
-```
+---
 
-### Example Request
+## Technical Decisions
 
-```json
-POST /api/tool-chat
-{
-  "messages": [
-    { "role": "user", "content": "Audit https://example.com for SEO issues" }
-  ]
-}
-```
+1. **Next.js 16 App Router & Turbopack**: Chosen for fast builds, React 19 integration, dynamic route handlers, and streaming SSR support.
+2. **Vercel AI SDK 4 (`ai`, `@ai-sdk/google`)**: Provides standardized `streamText` abstractions, SSE message streaming, and type-safe tool calling with Zod schemas.
+3. **In-Memory Sliding Window Rate Limiter**: Simple, zero-dependency rate limiter suitable for serverless execution environments without requiring Redis setup.
+4. **Local Fallback Stream Engine**: Built into AI route handlers to guarantee 100% application availability and smooth UI demonstrations even if upstream LLM API limits are reached.
+5. **Sentence-Buffered ARIA Live Announcer**: Solves screen reader stream storming by batching incoming token deltas into completed sentences before announcing.
 
-### Example Response (streamed AI SDK UI message stream)
+---
 
-The server streams in AI SDK v7 UI message stream protocol. The tool result includes:
+## How AI Tools Were Used
 
-```json
-{
-  "url": "https://example.com",
-  "title": "Example Domain | Example",
-  "metaDescription": "Example domain description...",
-  "canonical": "https://example.com",
-  "robots": "index, follow",
-  "language": "en",
-  "headings": [{ "level": 1, "text": "Welcome to example.com" }, ...],
-  "imagesWithoutAlt": [],
-  "brokenLinks": [],
-  "pageSpeedEstimate": { "fcp": 1800, "lcp": 2900, "cls": 0.05, "ttfb": 350 },
-  "seoScore": 85,
-  "recommendations": [
-    {
-      "priority": "medium",
-      "category": "Content Structure",
-      "title": "Improve Heading Hierarchy",
-      "description": "Ensure a single H1 tag and logical heading structure..."
-    }
-  ]
-}
-```
+*This section provides an honest breakdown of AI tool usage during development.*
 
-### Tool Lifecycle States (4 Required States)
+- **AI Tools Used**: Gemini / Antigravity AI pair programming assistant.
+- **AI Contributions**:
+  - **Security & Infrastructure**: Drafted rate limiting (`lib/rateLimit.ts`) and CORS helper (`lib/cors.ts`) abstractions; updated API route handlers with `maxDuration`, payload limits, and OPTIONS preflight support.
+  - **Shaders & Animations**: Assisted in crafting the WebGL GLSL fragment shader (`shaders/aetherFlow.frag`) and React canvas wrapper (`AetherFlowHero.jsx`).
+  - **Testing**: Generated initial test boilerplates for Vitest component tests (`__tests__/*.test.tsx`) and Playwright E2E tests (`__tests__/e2e/chat.spec.ts`).
+  - **Accessibility**: Helped construct `AriaLiveAnnouncer.tsx` to handle sentence buffering for streaming AI responses.
+- **Human Guidance & Verification**:
+  - **Architecture & Requirements**: All architectural boundaries, route structures, component breakdowns, and design tokens were specified and directed by human requirements.
+  - **Verification**: Every build check (`npm run build`), linting check (`npm run lint`), test run (`npm run test:run`), and browser layout check was verified and executed locally by human review.
 
-| State | Component | Description |
-|---|---|---|
-| 1. `streaming` | `ToolLoadingCard` | Framer Motion skeleton + spinner + "Analyzing..." |
-| 2. `input` | `ToolInputCard` | Shows selected tool + URL cleanly (no JSON) |
-| 3. `output` | `SEOAuditResult` | Full Generative UI with all SEO components |
-| 4. `error` | `ToolErrorCard` | Animated error with retry button |
+---
 
-### Component Flow
+## Known Limitations
 
-```
-useToolChat hook (hooks/useToolChat.ts)
-  └─ POST /api/tool-chat (app/api/tool-chat/route.ts)
-       └─ streamText() + seoAuditTool (server/tools/seoAudit.ts)
-            └─ toUIMessageStream() → createUIMessageStreamResponse()
+- **Client-Side History**: Chat history is persisted in `localStorage` per browser session.
+- **Mock SEO Audit Tool Data**: The `seoAudit` tool generates realistic structured audit metrics using URL hash determinism; production live scanning would integrate a server-side HTML parser (Cheerio/JSDOM) or Lighthouse API.
 
-ToolChatPage (components/chat/ToolChatPage.tsx)
-  └─ AssistantBubble
-       └─ ToolRenderer (components/tools/ToolRenderer.tsx)
-            ├─ state="streaming" → ToolLoadingCard
-            ├─ state="input"     → ToolInputCard
-            ├─ state="output"    → SEOAuditResult
-            │    ├─ SEOScoreCard       (animated arc progress)
-            │    ├─ AuditSummary       (metrics + Core Web Vitals)
-            │    ├─ MetadataCard       (title, meta, canonical, robots)
-            │    ├─ HeadingTree        (H1-H6 hierarchy)
-            │    ├─ FindingsTable      (images + broken links)
-            │    └─ RecommendationCard (priority-sorted fixes)
-            └─ state="error"     → ToolErrorCard
-```
+---
 
-### Updated Folder Structure (FE-07 additions)
+## Project Structure
 
-```
+```text
+d:\Capstone skeleton/
+├── .env.example           # Environment template with safe placeholders
+├── .env.local             # Local development environment secrets (gitignored)
+├── next.config.mjs        # Next.js 16 configuration
+├── package.json           # Scripts and dependencies
+├── README.md              # Project documentation
+├── tsconfig.json          # TypeScript configuration
+├── vitest.config.ts       # Vitest test framework configuration
+├── playwright.config.ts   # Playwright E2E test configuration
 ├── app/
-│   ├── api/
-│   │   └── tool-chat/        # [NEW] AI SDK tool-enabled streaming endpoint
-│   │       └── route.ts
-│   └── seo-audit/            # [NEW] SEO Audit chat page route
-│       └── page.tsx
+│   ├── layout.js          # Root layout & global styles
+│   ├── page.js            # Landing page featuring Aether Flow Hero
+│   ├── globals.css        # Tailwind v4 styles & safe-area rules
+│   ├── error.tsx          # App Route error boundary
+│   ├── global-error.tsx   # Global HTML crash boundary
+│   ├── loading.tsx        # Global page skeleton loader
+│   ├── about/             # About page
+│   ├── button-demo/       # Interactive AnimatedStatefulButton demo
+│   ├── chat/              # Streaming AI chat route (/chat)
+│   ├── contact/           # Validated contact form page
+│   ├── dashboard/         # Flight logger console page
+│   ├── features/          # Feature grid page
+│   ├── health/            # SSR health page
+│   ├── seo-audit/         # Tool-enabled SEO audit page (/seo-audit)
+│   └── api/
+│       ├── chat/          # POST /api/chat route handler
+│       ├── tool-chat/     # POST /api/tool-chat route handler
+│       └── health/        # GET /api/health route handler
 ├── components/
-│   └── tools/                # [NEW] Tool UI component library
-│       ├── ToolLoadingCard.tsx
-│       ├── ToolInputCard.tsx
-│       ├── ToolErrorCard.tsx
-│       ├── ToolRenderer.tsx
-│       ├── SEOAuditResult.tsx
-│       ├── SEOScoreCard.tsx
-│       ├── MetadataCard.tsx
-│       ├── HeadingTree.tsx
-│       ├── FindingsTable.tsx
-│       ├── RecommendationCard.tsx
-│       └── AuditSummary.tsx
+│   ├── AetherFlowHero/    # WebGL GLSL hero canvas & styles
+│   ├── AnimatedStatefulButton.tsx # Stateful motion button
+│   ├── chat/              # Chat UI components & AriaLiveAnnouncer
+│   ├── resilience/        # Resilience cards (Offline, 429, 5xx, Slow, Onboarding)
+│   └── tools/             # Tool UI cards & Generative UI renderers
 ├── hooks/
-│   └── useToolChat.ts        # [NEW] AI SDK stream parser & tool state manager
+│   ├── useNetworkStatus.ts# Online/offline network status hook
+│   ├── useStreamingChat.ts# Streaming chat hook with local fallback
+│   └── useToolChat.ts     # AI SDK UI stream parser & tool state manager
+├── lib/
+│   ├── cors.ts            # CORS preflight & security headers helper
+│   ├── rateLimit.ts       # Sliding window rate limiter helper
+│   └── utils.js           # Classnames utility helper
 ├── server/
-│   └── tools/
-│       └── seoAudit.ts       # [NEW] Zod schema + mock SEO audit tool
-└── types/
-    └── tools.ts              # [NEW] Tool lifecycle types
-```
-
-### Architecture Diagram
-
-```
-Client                          Server
-  │                               │
-  │  POST /api/tool-chat           │
-  ├──────────────────────────────►│
-  │                               │  streamText({
-  │                               │    model: gemini-2.0-flash,
-  │                               │    tools: { seoAudit },
-  │                               │    stopWhen: isStepCount(3)
-  │                               │  })
-  │                               │
-  │  ◄── AI SDK UI stream ─────── │  tool.execute() → mock data
-  │    "a": tool-call-start        │
-  │    "b": arg deltas             │
-  │    "a": tool-result            │
-  │    "0": text delta             │
-  │    "d": finish                 │
-  │                               │
+│   ├── ai/                # Model parameters, system prompt & fallback response engine
+│   └── tools/             # seoAudit tool definition & Zod schemas
+├── shaders/
+│   └── aetherFlow.frag    # WebGL GLSL fragment shader source
+└── __tests__/             # Vitest unit tests & Playwright E2E test suite
 ```
 
 ---
 
-## FE-08: Error Handling, Empty States & Resilience
+## Troubleshooting
 
-FlyRank AI incorporates a comprehensive, production-ready resilience architecture covering all failure states, route error boundaries, offline detection, HTTP 429 cooldowns, slow response progress indicators (>2s), empty states, and Mobile Safari polish.
-
-### Error Handling Strategy & Components
-
-| Failure / State | Component / Boundary | Action & UX |
-|---|---|---|
-| **Network Failure** | `components/resilience/OfflineBanner.tsx` | Displays offline warning, preserves user prompt, single-click retry |
-| **HTTP 429 Rate Limit** | `components/resilience/RateLimitCard.tsx` | Shows friendly rate limit notice, active 10s countdown timer, auto-enables retry |
-| **HTTP 500 / 502 / 503** | `components/resilience/ApiErrorCard.tsx` | Friendly explanation, single-request retry, collapsible details (no stack traces) |
-| **Slow Thinking (> 2s)** | `components/resilience/SlowResponseCard.tsx` | Triggered after 2 seconds: "Still thinking...", progress bar & skeleton |
-| **No Results Found** | `components/resilience/NoResultsCard.tsx` | Displays "No relevant results found" with 3 clickable prompt chips |
-| **First Run Onboarding** | `components/resilience/OnboardingState.tsx` | Welcome headline, description, animated icon & quick action chips |
-| **App Route Error** | `app/error.tsx` | Route error boundary with try again reset button and expandable details |
-| **Global Error** | `app/global-error.tsx` | HTML root error boundary for unexpected crashes |
-| **Loading State** | `app/loading.tsx` | Layout-matching skeleton loader preventing CLS |
-| **Empty Input** | `components/chat/ChatInput.tsx` | Disabled send button, subtle validation indicator, prevents whitespace submits |
-
-### Single-Request Retry Flow
-
-```
-User Prompt (Saved in State)
-  │
-  ├─► Network Error / Server 5xx / 429 Rate Limit
-  │      │
-  │      ├─► Display specific Resilience Card (OfflineBanner / ApiErrorCard / RateLimitCard)
-  │      │
-  │      └─► User clicks "Retry Request"
-  │            │
-  │            └─► Retries ONLY the failed assistant request
-  │                (Reuses prompt, no duplicate user messages, no double-click)
-```
-
-### Testing Checklist
-
-- [x] **Network Offline**: Disconnect network → `OfflineBanner` renders, preserves prompt, retry works when reconnected.
-- [x] **Mid-Stream Interruption**: Interrupt connection → Partial response preserved, inline retry available.
-- [x] **HTTP 429 Rate Limit**: Returns 429 → `RateLimitCard` counts down 10s, retry button auto-enables.
-- [x] **HTTP 500 / 502 / 503**: Returns 5xx → `ApiErrorCard` renders with collapsible diagnostics (no stack traces).
-- [x] **Slow Response (> 2s)**: Delay > 2s → `SlowResponseCard` progress bar animates.
-- [x] **Empty Prompt Input**: Whitespace input → Send disabled, subtle validation banner shown.
-- [x] **No Results**: Unmatched query → `NoResultsCard` shows 3 clickable prompt chips.
-- [x] **First Run Empty State**: Fresh session → `OnboardingState` displays welcome screen.
-- [x] **Mobile Safari**: Tested on mobile viewports with `100dvh`, safe-area-inset padding, and overscroll lock.
-- [x] **Accessibility**: Screen reader ARIA live regions (`aria-live="polite"`), `prefers-reduced-motion` CSS rules.
-
-### Mobile & Accessibility Polish
-
-- **Viewport Height**: `100dvh` CSS rules to handle Mobile Safari dynamic address bar resizing.
-- **Safe Area Insets**: `padding-bottom: env(safe-area-inset-bottom)` for notch/home-indicator clearance.
-- **Scroll Lock**: `overscroll-behavior-y: none` prevents iOS rubber-band body pulling.
-- **Reduced Motion**: Respects `prefers-reduced-motion: reduce` by disabling non-essential keyframe animations.
+1. **`npm run dev` fails to start**:
+   Ensure Node.js is version 20+ (`node -v`). Delete `.next/` directory and re-run `npm run dev`.
+2. **AI Provider API Key missing warning**:
+   If `GEMINI_API_KEY` is not present in `.env.local`, Aether AI automatically uses its built-in local fallback engine to stream simulated responses. Add your Gemini key to enable live remote model generation.
+3. **Vite / Vitest config loader warning**:
+   Run `npm run test:run` directly. The warning is informational regarding Vite config loading.
 
 ---
 
-## Animated Stateful Button — Motion with Intent (Internship Assignment)
+## License
 
-### Component: `components/AnimatedStatefulButton.tsx`
-An interactive, reusable button designed for form submissions and async operations (like the AI Chat "Send Message" task). It visualizes its complete lifecycle with smooth transitions, tactile hover states, and clear success/error results.
-
-#### Features & State Transitions:
-1. **Idle**: Default visual state with a standard gradient (`from-secondary to-primary`) and a paper plane send icon.
-2. **Hover / Focus**: Snappy scale (`scale: 1.02`), glow brightness, and opacity change in 150ms. Visible focus ring (`focus-visible:ring-2`) for keyboard users.
-3. **Pressed**: Immediate tactile scaling down (`scale: 0.97`) in 100ms.
-4. **Loading**: Cross-fades the text and icon out, fading the spinner in (200ms duration). The button is locked during execution to prevent duplicate requests or spam-clicking.
-5. **Success**: Transitions into a checkmark icon with an emerald gradient background (400ms duration). Holds the success state for 2.5 seconds, then returns to Idle.
-6. **Error**: Transitions into an alert icon with an amber/red gradient background and triggers a short shake animation (400ms duration). Auto-returns to Idle after 3 seconds, or allows instant retry on click.
-7. **Disabled**: Standard HTML disabled state rendering with `opacity-40` and `pointer-events-none`.
-
----
-
-### Motion Design Rationale
-* **Snappy Transitions for User Actions (100–150ms)**: User interactions (hovering, pressing) feel immediate, responsive, and tactile.
-* **Perceptible States for System Updates (200–450ms)**: Loading transitions and success/error feedbacks take slightly longer so they are easily noticed by the user without slowing down their workflow.
-* **Compositor-Friendly Rendering**: Transitions are restricted to GPU-accelerated CSS properties (`transform` and `opacity`) to guarantee 60 FPS rendering and eliminate Layout Thrashing.
-* **Interruptibility & Resilience**: Prevents duplicate submissions by locking the button interface during execution. Active timers are cleanly cancelled on new triggers, and states recover to a valid `idle` state.
-
----
-
-### Accessibility & Reduced Motion
-* **Real Elements**: Built on top of a native `<button>` element ensuring screen-reader compatibility and standard event bindings.
-* **Focus Indicator**: Enforces a visible, high-contrast cyan/indigo ring on keyboard tab focus.
-* **Screen Reader Telemetry**: Uses `aria-live="assertive"` and `aria-busy` to read state changes (e.g. "Sending...", "Message Sent", "Error / Retry").
-* **Prefers-Reduced-Motion**: Detects user system preferences via Framer Motion's `useReducedMotion()` hook. When enabled:
-  - All scale transitions (hover, active/pressed) are bypassed.
-  - The side-to-side error shake animation is skipped.
-  - The vertical slide translations (`y` axis offsets) are omitted.
-  - The button relies entirely on instant opacity cross-fades and color changes, remaining completely understandable.
-
+This project is licensed under the [MIT License](LICENSE).
