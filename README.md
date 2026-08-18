@@ -128,8 +128,8 @@ User Browser
 ### Setup & Run
 ```bash
 # 1. Clone the repository
-git clone <repository-url>
-cd flyrank-app
+git clone https://github.com/Themonsterk9/Capstone-skeleton.git
+cd Capstone-skeleton
 
 # 2. Install dependencies
 npm install
