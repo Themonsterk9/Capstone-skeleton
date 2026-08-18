@@ -1,21 +1,43 @@
 /**
  * Cross-Origin Resource Sharing (CORS) & Security Headers Utility
+ * Optimized for Render production deployment with Vercel frontend origin support.
  */
 
 export function getCorsHeaders(requestOrigin?: string | null): Record<string, string> {
-  const allowedOrigins = [
+  const rawOrigins = [
     process.env.NEXT_PUBLIC_APP_URL,
+    process.env.CLIENT_URL,
+    process.env.FRONTEND_URL,
+    process.env.VERCEL_URL ? (process.env.VERCEL_URL.startsWith("http") ? process.env.VERCEL_URL : `https://${process.env.VERCEL_URL}`) : null,
     "http://localhost:3000",
     "http://127.0.0.1:3000",
   ].filter(Boolean) as string[];
 
-  const isAllowed =
-    requestOrigin &&
-    allowedOrigins.some(
-      (origin) => origin.replace(/\/$/, "") === requestOrigin.replace(/\/$/, "")
+  let isAllowed = false;
+
+  if (requestOrigin) {
+    const normalizedReqOrigin = requestOrigin.replace(/\/$/, "");
+    isAllowed = rawOrigins.some(
+      (origin) => origin.replace(/\/$/, "") === normalizedReqOrigin
     );
 
-  const originHeader = isAllowed ? (requestOrigin as string) : allowedOrigins[0] || "*";
+    if (!isAllowed) {
+      try {
+        const urlObj = new URL(requestOrigin);
+        if (
+          /\.vercel\.app$/i.test(urlObj.hostname) ||
+          urlObj.hostname === "localhost" ||
+          urlObj.hostname === "127.0.0.1"
+        ) {
+          isAllowed = true;
+        }
+      } catch {
+        isAllowed = false;
+      }
+    }
+  }
+
+  const originHeader = isAllowed ? (requestOrigin as string) : rawOrigins[0] || "*";
 
   return {
     "Access-Control-Allow-Origin": originHeader,
